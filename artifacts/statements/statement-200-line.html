@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Statement of Account — DEBT-001</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 15mm 15mm 20mm 15mm;
+      @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 8pt;
+        color: #718096;
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1a202c;
+      margin: 0;
+      padding: 0;
+      font-size: 9.5pt;
+      line-height: 1.4;
+      background: #ffffff;
+    }
+    .header-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .header-table td {
+      vertical-align: top;
+    }
+    .merchant-brand {
+      font-size: 16pt;
+      font-weight: 700;
+      color: #123d32;
+      margin: 0 0 4px;
+    }
+    .merchant-meta {
+      color: #4a5568;
+      font-size: 8.5pt;
+      line-height: 1.35;
+    }
+    .statement-title-box {
+      text-align: right;
+    }
+    .statement-title {
+      font-size: 18pt;
+      font-weight: 800;
+      color: #123d32;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 6px;
+    }
+    .meta-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #edf2f7;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      font-size: 8.5pt;
+      font-weight: 600;
+      color: #2d3748;
+    }
+    .parties-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    .parties-table td {
+      width: 50%;
+      vertical-align: top;
+      padding: 10px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: #f8fafc;
+    }
+    .section-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #718096;
+      margin-bottom: 4px;
+    }
+    .party-name {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 4px;
+    }
+    .party-info {
+      font-size: 8.5pt;
+      color: #4a5568;
+      line-height: 1.35;
+    }
+    .totals-summary {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 6px;
+    }
+    .totals-summary td {
+      padding: 10px 14px;
+      text-align: center;
+      border-right: 1px solid #bbf7d0;
+    }
+    .totals-summary td:last-child {
+      border-right: none;
+      background: #dcfce7;
+    }
+    .totals-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #166534;
+      margin-bottom: 3px;
+    }
+    .totals-value {
+      font-size: 12pt;
+      font-weight: 800;
+      color: #14532d;
+      font-variant-numeric: tabular-nums;
+    }
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 18px;
+    }
+    .items-table th {
+      background: #123d32;
+      color: #ffffff;
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 7px 10px;
+      text-align: left;
+      border: 1px solid #123d32;
+    }
+    .items-table td {
+      padding: 7px 10px;
+      border: 1px solid #e2e8f0;
+      font-size: 8.5pt;
+      vertical-align: middle;
+    }
+    .items-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    .items-table .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .aging-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 22px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+    }
+    .aging-table th {
+      background: #edf2f7;
+      padding: 6px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #4a5568;
+      border-right: 1px solid #cbd5e0;
+      border-bottom: 1px solid #cbd5e0;
+      text-align: center;
+    }
+    .aging-table td {
+      padding: 8px 6px;
+      font-size: 8.5pt;
+      font-weight: 700;
+      text-align: center;
+      border-right: 1px solid #cbd5e0;
+      font-variant-numeric: tabular-nums;
+    }
+    .aging-table th:last-child,
+    .aging-table td:last-child {
+      border-right: none;
+    }
+    .aging-table .due-alert {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+    .remittance-slip {
+      border: 2px dashed #94a3b8;
+      border-radius: 6px;
+      padding: 14px;
+      background: #fdfdfd;
+      margin-top: 24px;
+      page-break-inside: avoid;
+    }
+    .remittance-title {
+      font-size: 10pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #123d32;
+      margin: 0 0 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .remittance-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 16px;
+    }
+    .bank-box {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 8.5pt;
+      line-height: 1.4;
+    }
+    .slip-fields {
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 8.5pt;
+    }
+    .slip-fields .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .sha-hash {
+      font-family: monospace;
+      font-size: 7pt;
+      color: #94a3b8;
+      text-align: right;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header: Merchant & Statement Meta -->
+  <table class="header-table">
+    <tr>
+      <td>
+        <div class="merchant-brand">Genesis Wholesale Ltd</div>
+        <div class="merchant-meta">
+          42 Industrial Way, Cape Town, 8001, South Africa<br>
+          VAT/Tax #: ZA4001122334 · 
+          Email: accounts@genesiswholesale.co.za · Tel: +27 21 555 1234
+        </div>
+      </td>
+      <td class="statement-title-box">
+        <div class="statement-title">Statement</div>
+        <div class="meta-badge">
+          Date: 2026-08-31 · Generation: #1
+        </div>
+        <div style="font-size: 8pt; color: #718096; margin-top: 4px;">
+          Period: 2026-08-01 to 2026-08-31
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Customer Box & Account Reference -->
+  <table class="parties-table">
+    <tr>
+      <td>
+        <div class="section-label">Account Holder</div>
+        <div class="party-name">Apex Engineering Works</div>
+        <div class="party-info">
+          Account #: <strong>DEBT-001</strong><br>
+          Email: accounts@apexeng.co.za<br>
+          Phone: +27 11 999 8888<br>
+          15 Factory Road, Epping, Cape Town, 7460
+        </div>
+      </td>
+      <td>
+        <div class="section-label">Statement Parameters</div>
+        <div class="party-info">
+          Statement ID: <code>stmt-0003-two-hundred-line</code><br>
+          Cutoff Recorded At: 2026-08-31T23:59:59.000Z<br>
+          Currency: <strong>ZAR</strong><br>
+          Ledger Revision: v10 · Policy: v2
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Control Totals Summary -->
+  <table class="totals-summary">
+    <tr>
+      <td>
+        <div class="totals-label">Opening Balance</div>
+        <div class="totals-value">ZAR 0.0000</div>
+      </td>
+      <td>
+        <div class="totals-label">Period Debits (+)</div>
+        <div class="totals-value">ZAR 8000.0000</div>
+      </td>
+      <td>
+        <div class="totals-label">Period Credits (-)</div>
+        <div class="totals-value">ZAR 2000.0000</div>
+      </td>
+      <td>
+        <div class="totals-label">Closing Balance Due</div>
+        <div class="totals-value">ZAR 6000.0000</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Transactions Table -->
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th style="width: 12%;">Date</th>
+        <th style="width: 18%;">Document #</th>
+        <th style="width: 14%;">Type</th>
+        <th style="width: 14%;">Due Date</th>
+        <th class="num" style="width: 14%;">Debits</th>
+        <th class="num" style="width: 14%;">Credits</th>
+        <th class="num" style="width: 14%;">Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2026-08-01</td>
+        <td colspan="5"><strong>Balance Brought Forward</strong></td>
+        <td class="num"><strong>ZAR 0.0000</strong></td>
+      </tr>
+      
+      <tr>
+        <td>2026-08-01</td>
+        <td><strong>INV-200-112</strong></td>
+        <td>invoice</td>
+        <td>2026-09-01</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-01</td>
+        <td><strong>INV-200-168</strong></td>
+        <td>invoice</td>
+        <td>2026-09-01</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-01</td>
+        <td><strong>INV-200-196</strong></td>
+        <td>invoice</td>
+        <td>2026-09-01</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 150.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-01</td>
+        <td><strong>INV-200-28</strong></td>
+        <td>invoice</td>
+        <td>2026-09-01</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 200.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-01</td>
+        <td><strong>INV-200-56</strong></td>
+        <td>invoice</td>
+        <td>2026-09-01</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-01</td>
+        <td><strong>INV-200-84</strong></td>
+        <td>invoice</td>
+        <td>2026-09-01</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-01</td>
+        <td><strong>RCT-200-140</strong></td>
+        <td>payment</td>
+        <td>2026-09-01</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-02</td>
+        <td><strong>INV-200-1</strong></td>
+        <td>invoice</td>
+        <td>2026-09-02</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-02</td>
+        <td><strong>INV-200-113</strong></td>
+        <td>invoice</td>
+        <td>2026-09-02</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-02</td>
+        <td><strong>INV-200-141</strong></td>
+        <td>invoice</td>
+        <td>2026-09-02</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-02</td>
+        <td><strong>INV-200-169</strong></td>
+        <td>invoice</td>
+        <td>2026-09-02</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-02</td>
+        <td><strong>INV-200-197</strong></td>
+        <td>invoice</td>
+        <td>2026-09-02</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-02</td>
+        <td><strong>INV-200-29</strong></td>
+        <td>invoice</td>
+        <td>2026-09-02</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-02</td>
+        <td><strong>INV-200-57</strong></td>
+        <td>invoice</td>
+        <td>2026-09-02</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-02</td>
+        <td><strong>RCT-200-85</strong></td>
+        <td>payment</td>
+        <td>2026-09-02</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-03</td>
+        <td><strong>INV-200-114</strong></td>
+        <td>invoice</td>
+        <td>2026-09-03</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-03</td>
+        <td><strong>INV-200-142</strong></td>
+        <td>invoice</td>
+        <td>2026-09-03</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-03</td>
+        <td><strong>INV-200-198</strong></td>
+        <td>invoice</td>
+        <td>2026-09-03</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-03</td>
+        <td><strong>INV-200-2</strong></td>
+        <td>invoice</td>
+        <td>2026-09-03</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-03</td>
+        <td><strong>INV-200-58</strong></td>
+        <td>invoice</td>
+        <td>2026-09-03</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-03</td>
+        <td><strong>INV-200-86</strong></td>
+        <td>invoice</td>
+        <td>2026-09-03</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-03</td>
+        <td><strong>RCT-200-170</strong></td>
+        <td>payment</td>
+        <td>2026-09-03</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-03</td>
+        <td><strong>RCT-200-30</strong></td>
+        <td>payment</td>
+        <td>2026-09-03</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-04</td>
+        <td><strong>INV-200-143</strong></td>
+        <td>invoice</td>
+        <td>2026-09-04</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-04</td>
+        <td><strong>INV-200-171</strong></td>
+        <td>invoice</td>
+        <td>2026-09-04</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-04</td>
+        <td><strong>INV-200-199</strong></td>
+        <td>invoice</td>
+        <td>2026-09-04</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-04</td>
+        <td><strong>INV-200-3</strong></td>
+        <td>invoice</td>
+        <td>2026-09-04</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-04</td>
+        <td><strong>INV-200-31</strong></td>
+        <td>invoice</td>
+        <td>2026-09-04</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-04</td>
+        <td><strong>INV-200-59</strong></td>
+        <td>invoice</td>
+        <td>2026-09-04</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-04</td>
+        <td><strong>INV-200-87</strong></td>
+        <td>invoice</td>
+        <td>2026-09-04</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-04</td>
+        <td><strong>RCT-200-115</strong></td>
+        <td>payment</td>
+        <td>2026-09-04</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 1050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-05</td>
+        <td><strong>INV-200-116</strong></td>
+        <td>invoice</td>
+        <td>2026-09-05</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-05</td>
+        <td><strong>INV-200-144</strong></td>
+        <td>invoice</td>
+        <td>2026-09-05</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1150.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-05</td>
+        <td><strong>INV-200-172</strong></td>
+        <td>invoice</td>
+        <td>2026-09-05</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1200.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-05</td>
+        <td><strong>INV-200-32</strong></td>
+        <td>invoice</td>
+        <td>2026-09-05</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-05</td>
+        <td><strong>INV-200-4</strong></td>
+        <td>invoice</td>
+        <td>2026-09-05</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-05</td>
+        <td><strong>INV-200-88</strong></td>
+        <td>invoice</td>
+        <td>2026-09-05</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-05</td>
+        <td><strong>RCT-200-200</strong></td>
+        <td>payment</td>
+        <td>2026-09-05</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 1300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-05</td>
+        <td><strong>RCT-200-60</strong></td>
+        <td>payment</td>
+        <td>2026-09-05</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 1250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-06</td>
+        <td><strong>INV-200-117</strong></td>
+        <td>invoice</td>
+        <td>2026-09-06</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-06</td>
+        <td><strong>INV-200-173</strong></td>
+        <td>invoice</td>
+        <td>2026-09-06</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-06</td>
+        <td><strong>INV-200-33</strong></td>
+        <td>invoice</td>
+        <td>2026-09-06</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-06</td>
+        <td><strong>INV-200-61</strong></td>
+        <td>invoice</td>
+        <td>2026-09-06</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-06</td>
+        <td><strong>INV-200-89</strong></td>
+        <td>invoice</td>
+        <td>2026-09-06</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-06</td>
+        <td><strong>RCT-200-145</strong></td>
+        <td>payment</td>
+        <td>2026-09-06</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 1450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-06</td>
+        <td><strong>RCT-200-5</strong></td>
+        <td>payment</td>
+        <td>2026-09-06</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 1400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-07</td>
+        <td><strong>INV-200-118</strong></td>
+        <td>invoice</td>
+        <td>2026-09-07</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-07</td>
+        <td><strong>INV-200-146</strong></td>
+        <td>invoice</td>
+        <td>2026-09-07</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-07</td>
+        <td><strong>INV-200-174</strong></td>
+        <td>invoice</td>
+        <td>2026-09-07</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-07</td>
+        <td><strong>INV-200-34</strong></td>
+        <td>invoice</td>
+        <td>2026-09-07</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-07</td>
+        <td><strong>INV-200-6</strong></td>
+        <td>invoice</td>
+        <td>2026-09-07</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-07</td>
+        <td><strong>INV-200-62</strong></td>
+        <td>invoice</td>
+        <td>2026-09-07</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-07</td>
+        <td><strong>RCT-200-90</strong></td>
+        <td>payment</td>
+        <td>2026-09-07</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 1650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-08</td>
+        <td><strong>INV-200-119</strong></td>
+        <td>invoice</td>
+        <td>2026-09-08</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-08</td>
+        <td><strong>INV-200-147</strong></td>
+        <td>invoice</td>
+        <td>2026-09-08</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-08</td>
+        <td><strong>INV-200-63</strong></td>
+        <td>invoice</td>
+        <td>2026-09-08</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-08</td>
+        <td><strong>INV-200-7</strong></td>
+        <td>invoice</td>
+        <td>2026-09-08</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-08</td>
+        <td><strong>INV-200-91</strong></td>
+        <td>invoice</td>
+        <td>2026-09-08</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-08</td>
+        <td><strong>RCT-200-175</strong></td>
+        <td>payment</td>
+        <td>2026-09-08</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 1850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-08</td>
+        <td><strong>RCT-200-35</strong></td>
+        <td>payment</td>
+        <td>2026-09-08</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 1800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-09</td>
+        <td><strong>INV-200-148</strong></td>
+        <td>invoice</td>
+        <td>2026-09-09</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-09</td>
+        <td><strong>INV-200-176</strong></td>
+        <td>invoice</td>
+        <td>2026-09-09</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-09</td>
+        <td><strong>INV-200-36</strong></td>
+        <td>invoice</td>
+        <td>2026-09-09</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-09</td>
+        <td><strong>INV-200-64</strong></td>
+        <td>invoice</td>
+        <td>2026-09-09</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-09</td>
+        <td><strong>INV-200-8</strong></td>
+        <td>invoice</td>
+        <td>2026-09-09</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-09</td>
+        <td><strong>INV-200-92</strong></td>
+        <td>invoice</td>
+        <td>2026-09-09</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-09</td>
+        <td><strong>RCT-200-120</strong></td>
+        <td>payment</td>
+        <td>2026-09-09</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 2050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-10</td>
+        <td><strong>INV-200-121</strong></td>
+        <td>invoice</td>
+        <td>2026-09-10</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-10</td>
+        <td><strong>INV-200-149</strong></td>
+        <td>invoice</td>
+        <td>2026-09-10</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2150.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-10</td>
+        <td><strong>INV-200-177</strong></td>
+        <td>invoice</td>
+        <td>2026-09-10</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2200.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-10</td>
+        <td><strong>INV-200-37</strong></td>
+        <td>invoice</td>
+        <td>2026-09-10</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-10</td>
+        <td><strong>INV-200-9</strong></td>
+        <td>invoice</td>
+        <td>2026-09-10</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-10</td>
+        <td><strong>INV-200-93</strong></td>
+        <td>invoice</td>
+        <td>2026-09-10</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-10</td>
+        <td><strong>RCT-200-65</strong></td>
+        <td>payment</td>
+        <td>2026-09-10</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 2300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-11</td>
+        <td><strong>INV-200-122</strong></td>
+        <td>invoice</td>
+        <td>2026-09-11</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-11</td>
+        <td><strong>INV-200-178</strong></td>
+        <td>invoice</td>
+        <td>2026-09-11</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-11</td>
+        <td><strong>INV-200-38</strong></td>
+        <td>invoice</td>
+        <td>2026-09-11</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-11</td>
+        <td><strong>INV-200-66</strong></td>
+        <td>invoice</td>
+        <td>2026-09-11</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-11</td>
+        <td><strong>INV-200-94</strong></td>
+        <td>invoice</td>
+        <td>2026-09-11</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-11</td>
+        <td><strong>RCT-200-10</strong></td>
+        <td>payment</td>
+        <td>2026-09-11</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 2500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-11</td>
+        <td><strong>RCT-200-150</strong></td>
+        <td>payment</td>
+        <td>2026-09-11</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 2450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-12</td>
+        <td><strong>INV-200-11</strong></td>
+        <td>invoice</td>
+        <td>2026-09-12</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-12</td>
+        <td><strong>INV-200-123</strong></td>
+        <td>invoice</td>
+        <td>2026-09-12</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-12</td>
+        <td><strong>INV-200-151</strong></td>
+        <td>invoice</td>
+        <td>2026-09-12</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-12</td>
+        <td><strong>INV-200-179</strong></td>
+        <td>invoice</td>
+        <td>2026-09-12</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-12</td>
+        <td><strong>INV-200-39</strong></td>
+        <td>invoice</td>
+        <td>2026-09-12</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-12</td>
+        <td><strong>INV-200-67</strong></td>
+        <td>invoice</td>
+        <td>2026-09-12</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-12</td>
+        <td><strong>RCT-200-95</strong></td>
+        <td>payment</td>
+        <td>2026-09-12</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 2700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-13</td>
+        <td><strong>INV-200-12</strong></td>
+        <td>invoice</td>
+        <td>2026-09-13</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-13</td>
+        <td><strong>INV-200-124</strong></td>
+        <td>invoice</td>
+        <td>2026-09-13</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-13</td>
+        <td><strong>INV-200-152</strong></td>
+        <td>invoice</td>
+        <td>2026-09-13</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-13</td>
+        <td><strong>INV-200-68</strong></td>
+        <td>invoice</td>
+        <td>2026-09-13</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-13</td>
+        <td><strong>INV-200-96</strong></td>
+        <td>invoice</td>
+        <td>2026-09-13</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-13</td>
+        <td><strong>RCT-200-180</strong></td>
+        <td>payment</td>
+        <td>2026-09-13</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 2900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-13</td>
+        <td><strong>RCT-200-40</strong></td>
+        <td>payment</td>
+        <td>2026-09-13</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 2850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-14</td>
+        <td><strong>INV-200-13</strong></td>
+        <td>invoice</td>
+        <td>2026-09-14</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-14</td>
+        <td><strong>INV-200-153</strong></td>
+        <td>invoice</td>
+        <td>2026-09-14</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 2950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-14</td>
+        <td><strong>INV-200-181</strong></td>
+        <td>invoice</td>
+        <td>2026-09-14</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-14</td>
+        <td><strong>INV-200-41</strong></td>
+        <td>invoice</td>
+        <td>2026-09-14</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-14</td>
+        <td><strong>INV-200-69</strong></td>
+        <td>invoice</td>
+        <td>2026-09-14</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-14</td>
+        <td><strong>INV-200-97</strong></td>
+        <td>invoice</td>
+        <td>2026-09-14</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3150.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-14</td>
+        <td><strong>RCT-200-125</strong></td>
+        <td>payment</td>
+        <td>2026-09-14</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 3100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-15</td>
+        <td><strong>INV-200-126</strong></td>
+        <td>invoice</td>
+        <td>2026-09-15</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3150.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-15</td>
+        <td><strong>INV-200-14</strong></td>
+        <td>invoice</td>
+        <td>2026-09-15</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3200.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-15</td>
+        <td><strong>INV-200-154</strong></td>
+        <td>invoice</td>
+        <td>2026-09-15</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-15</td>
+        <td><strong>INV-200-182</strong></td>
+        <td>invoice</td>
+        <td>2026-09-15</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-15</td>
+        <td><strong>INV-200-42</strong></td>
+        <td>invoice</td>
+        <td>2026-09-15</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-15</td>
+        <td><strong>INV-200-98</strong></td>
+        <td>invoice</td>
+        <td>2026-09-15</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-15</td>
+        <td><strong>RCT-200-70</strong></td>
+        <td>payment</td>
+        <td>2026-09-15</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 3350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-16</td>
+        <td><strong>INV-200-127</strong></td>
+        <td>invoice</td>
+        <td>2026-09-16</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-16</td>
+        <td><strong>INV-200-183</strong></td>
+        <td>invoice</td>
+        <td>2026-09-16</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-16</td>
+        <td><strong>INV-200-43</strong></td>
+        <td>invoice</td>
+        <td>2026-09-16</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-16</td>
+        <td><strong>INV-200-71</strong></td>
+        <td>invoice</td>
+        <td>2026-09-16</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-16</td>
+        <td><strong>INV-200-99</strong></td>
+        <td>invoice</td>
+        <td>2026-09-16</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-16</td>
+        <td><strong>RCT-200-15</strong></td>
+        <td>payment</td>
+        <td>2026-09-16</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 3550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-16</td>
+        <td><strong>RCT-200-155</strong></td>
+        <td>payment</td>
+        <td>2026-09-16</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 3500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-17</td>
+        <td><strong>INV-200-128</strong></td>
+        <td>invoice</td>
+        <td>2026-09-17</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-17</td>
+        <td><strong>INV-200-156</strong></td>
+        <td>invoice</td>
+        <td>2026-09-17</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-17</td>
+        <td><strong>INV-200-16</strong></td>
+        <td>invoice</td>
+        <td>2026-09-17</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-17</td>
+        <td><strong>INV-200-184</strong></td>
+        <td>invoice</td>
+        <td>2026-09-17</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-17</td>
+        <td><strong>INV-200-44</strong></td>
+        <td>invoice</td>
+        <td>2026-09-17</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-17</td>
+        <td><strong>INV-200-72</strong></td>
+        <td>invoice</td>
+        <td>2026-09-17</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-17</td>
+        <td><strong>RCT-200-100</strong></td>
+        <td>payment</td>
+        <td>2026-09-17</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 3750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-18</td>
+        <td><strong>INV-200-101</strong></td>
+        <td>invoice</td>
+        <td>2026-09-18</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-18</td>
+        <td><strong>INV-200-129</strong></td>
+        <td>invoice</td>
+        <td>2026-09-18</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-18</td>
+        <td><strong>INV-200-157</strong></td>
+        <td>invoice</td>
+        <td>2026-09-18</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-18</td>
+        <td><strong>INV-200-17</strong></td>
+        <td>invoice</td>
+        <td>2026-09-18</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-18</td>
+        <td><strong>INV-200-73</strong></td>
+        <td>invoice</td>
+        <td>2026-09-18</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-18</td>
+        <td><strong>RCT-200-185</strong></td>
+        <td>payment</td>
+        <td>2026-09-18</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 3950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-18</td>
+        <td><strong>RCT-200-45</strong></td>
+        <td>payment</td>
+        <td>2026-09-18</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 3900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-19</td>
+        <td><strong>INV-200-102</strong></td>
+        <td>invoice</td>
+        <td>2026-09-19</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 3950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-19</td>
+        <td><strong>INV-200-158</strong></td>
+        <td>invoice</td>
+        <td>2026-09-19</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-19</td>
+        <td><strong>INV-200-18</strong></td>
+        <td>invoice</td>
+        <td>2026-09-19</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-19</td>
+        <td><strong>INV-200-186</strong></td>
+        <td>invoice</td>
+        <td>2026-09-19</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-19</td>
+        <td><strong>INV-200-46</strong></td>
+        <td>invoice</td>
+        <td>2026-09-19</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4150.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-19</td>
+        <td><strong>INV-200-74</strong></td>
+        <td>invoice</td>
+        <td>2026-09-19</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4200.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-19</td>
+        <td><strong>RCT-200-130</strong></td>
+        <td>payment</td>
+        <td>2026-09-19</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 4150.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-20</td>
+        <td><strong>INV-200-103</strong></td>
+        <td>invoice</td>
+        <td>2026-09-20</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4200.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-20</td>
+        <td><strong>INV-200-131</strong></td>
+        <td>invoice</td>
+        <td>2026-09-20</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-20</td>
+        <td><strong>INV-200-159</strong></td>
+        <td>invoice</td>
+        <td>2026-09-20</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-20</td>
+        <td><strong>INV-200-187</strong></td>
+        <td>invoice</td>
+        <td>2026-09-20</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-20</td>
+        <td><strong>INV-200-19</strong></td>
+        <td>invoice</td>
+        <td>2026-09-20</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-20</td>
+        <td><strong>INV-200-47</strong></td>
+        <td>invoice</td>
+        <td>2026-09-20</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-20</td>
+        <td><strong>RCT-200-75</strong></td>
+        <td>payment</td>
+        <td>2026-09-20</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 4400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-21</td>
+        <td><strong>INV-200-104</strong></td>
+        <td>invoice</td>
+        <td>2026-09-21</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-21</td>
+        <td><strong>INV-200-132</strong></td>
+        <td>invoice</td>
+        <td>2026-09-21</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-21</td>
+        <td><strong>INV-200-188</strong></td>
+        <td>invoice</td>
+        <td>2026-09-21</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-21</td>
+        <td><strong>INV-200-48</strong></td>
+        <td>invoice</td>
+        <td>2026-09-21</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-21</td>
+        <td><strong>INV-200-76</strong></td>
+        <td>invoice</td>
+        <td>2026-09-21</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-21</td>
+        <td><strong>RCT-200-160</strong></td>
+        <td>payment</td>
+        <td>2026-09-21</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 4600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-21</td>
+        <td><strong>RCT-200-20</strong></td>
+        <td>payment</td>
+        <td>2026-09-21</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 4550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-22</td>
+        <td><strong>INV-200-133</strong></td>
+        <td>invoice</td>
+        <td>2026-09-22</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-22</td>
+        <td><strong>INV-200-161</strong></td>
+        <td>invoice</td>
+        <td>2026-09-22</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-22</td>
+        <td><strong>INV-200-189</strong></td>
+        <td>invoice</td>
+        <td>2026-09-22</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-22</td>
+        <td><strong>INV-200-21</strong></td>
+        <td>invoice</td>
+        <td>2026-09-22</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-22</td>
+        <td><strong>INV-200-49</strong></td>
+        <td>invoice</td>
+        <td>2026-09-22</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-22</td>
+        <td><strong>INV-200-77</strong></td>
+        <td>invoice</td>
+        <td>2026-09-22</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-22</td>
+        <td><strong>RCT-200-105</strong></td>
+        <td>payment</td>
+        <td>2026-09-22</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 4800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-23</td>
+        <td><strong>INV-200-106</strong></td>
+        <td>invoice</td>
+        <td>2026-09-23</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-23</td>
+        <td><strong>INV-200-134</strong></td>
+        <td>invoice</td>
+        <td>2026-09-23</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-23</td>
+        <td><strong>INV-200-162</strong></td>
+        <td>invoice</td>
+        <td>2026-09-23</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 4950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-23</td>
+        <td><strong>INV-200-22</strong></td>
+        <td>invoice</td>
+        <td>2026-09-23</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-23</td>
+        <td><strong>INV-200-78</strong></td>
+        <td>invoice</td>
+        <td>2026-09-23</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-23</td>
+        <td><strong>RCT-200-190</strong></td>
+        <td>payment</td>
+        <td>2026-09-23</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 5000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-23</td>
+        <td><strong>RCT-200-50</strong></td>
+        <td>payment</td>
+        <td>2026-09-23</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 4950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-24</td>
+        <td><strong>INV-200-107</strong></td>
+        <td>invoice</td>
+        <td>2026-09-24</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-24</td>
+        <td><strong>INV-200-163</strong></td>
+        <td>invoice</td>
+        <td>2026-09-24</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-24</td>
+        <td><strong>INV-200-191</strong></td>
+        <td>invoice</td>
+        <td>2026-09-24</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-24</td>
+        <td><strong>INV-200-23</strong></td>
+        <td>invoice</td>
+        <td>2026-09-24</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5150.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-24</td>
+        <td><strong>INV-200-51</strong></td>
+        <td>invoice</td>
+        <td>2026-09-24</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5200.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-24</td>
+        <td><strong>INV-200-79</strong></td>
+        <td>invoice</td>
+        <td>2026-09-24</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-24</td>
+        <td><strong>RCT-200-135</strong></td>
+        <td>payment</td>
+        <td>2026-09-24</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 5200.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-25</td>
+        <td><strong>INV-200-108</strong></td>
+        <td>invoice</td>
+        <td>2026-09-25</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5250.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-25</td>
+        <td><strong>INV-200-136</strong></td>
+        <td>invoice</td>
+        <td>2026-09-25</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5300.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-25</td>
+        <td><strong>INV-200-164</strong></td>
+        <td>invoice</td>
+        <td>2026-09-25</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5350.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-25</td>
+        <td><strong>INV-200-192</strong></td>
+        <td>invoice</td>
+        <td>2026-09-25</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5400.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-25</td>
+        <td><strong>INV-200-24</strong></td>
+        <td>invoice</td>
+        <td>2026-09-25</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-25</td>
+        <td><strong>INV-200-52</strong></td>
+        <td>invoice</td>
+        <td>2026-09-25</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-25</td>
+        <td><strong>RCT-200-80</strong></td>
+        <td>payment</td>
+        <td>2026-09-25</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 5450.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-26</td>
+        <td><strong>INV-200-109</strong></td>
+        <td>invoice</td>
+        <td>2026-09-26</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5500.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-26</td>
+        <td><strong>INV-200-137</strong></td>
+        <td>invoice</td>
+        <td>2026-09-26</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5550.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-26</td>
+        <td><strong>INV-200-193</strong></td>
+        <td>invoice</td>
+        <td>2026-09-26</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-26</td>
+        <td><strong>INV-200-53</strong></td>
+        <td>invoice</td>
+        <td>2026-09-26</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-26</td>
+        <td><strong>INV-200-81</strong></td>
+        <td>invoice</td>
+        <td>2026-09-26</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-26</td>
+        <td><strong>RCT-200-165</strong></td>
+        <td>payment</td>
+        <td>2026-09-26</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 5650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-26</td>
+        <td><strong>RCT-200-25</strong></td>
+        <td>payment</td>
+        <td>2026-09-26</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 5600.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-27</td>
+        <td><strong>INV-200-138</strong></td>
+        <td>invoice</td>
+        <td>2026-09-27</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5650.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-27</td>
+        <td><strong>INV-200-166</strong></td>
+        <td>invoice</td>
+        <td>2026-09-27</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5700.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-27</td>
+        <td><strong>INV-200-194</strong></td>
+        <td>invoice</td>
+        <td>2026-09-27</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5750.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-27</td>
+        <td><strong>INV-200-26</strong></td>
+        <td>invoice</td>
+        <td>2026-09-27</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5800.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-27</td>
+        <td><strong>INV-200-54</strong></td>
+        <td>invoice</td>
+        <td>2026-09-27</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-27</td>
+        <td><strong>INV-200-82</strong></td>
+        <td>invoice</td>
+        <td>2026-09-27</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-27</td>
+        <td><strong>RCT-200-110</strong></td>
+        <td>payment</td>
+        <td>2026-09-27</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 5850.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-28</td>
+        <td><strong>INV-200-111</strong></td>
+        <td>invoice</td>
+        <td>2026-09-28</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5900.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-28</td>
+        <td><strong>INV-200-139</strong></td>
+        <td>invoice</td>
+        <td>2026-09-28</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 5950.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-28</td>
+        <td><strong>INV-200-167</strong></td>
+        <td>invoice</td>
+        <td>2026-09-28</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 6000.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-28</td>
+        <td><strong>INV-200-27</strong></td>
+        <td>invoice</td>
+        <td>2026-09-28</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 6050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-28</td>
+        <td><strong>INV-200-83</strong></td>
+        <td>invoice</td>
+        <td>2026-09-28</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 6100.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-28</td>
+        <td><strong>RCT-200-195</strong></td>
+        <td>payment</td>
+        <td>2026-09-28</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 6050.0000</td>
+      </tr>
+      <tr>
+        <td>2026-08-28</td>
+        <td><strong>RCT-200-55</strong></td>
+        <td>payment</td>
+        <td>2026-09-28</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 50.0000</td>
+        <td class="num">ZAR 6000.0000</td>
+      </tr>
+      <tr style="background: #f1f5f9; font-weight: 700;">
+        <td colspan="4" style="text-align: right; padding-right: 12px;">Period Totals & Closing Balance:</td>
+        <td class="num">ZAR 8000.0000</td>
+        <td class="num">ZAR 2000.0000</td>
+        <td class="num" style="font-size: 9.5pt; color: #14532d;">ZAR 6000.0000</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 8-Bucket Aging Analysis -->
+  <div style="font-size: 8pt; font-weight: 700; text-transform: uppercase; color: #4a5568; margin-bottom: 4px;">
+    Aging Breakdown as of 2026-08-31 (Unapplied Credit: ZAR 2000.0000)
+  </div>
+  <table class="aging-table">
+    <thead>
+      <tr>
+        <th>Current</th>
+        <th>1–30 Days</th>
+        <th>31–60 Days</th>
+        <th>61–90 Days</th>
+        <th>91–120 Days</th>
+        <th>121–150 Days</th>
+        <th>151–180 Days</th>
+        <th>180+ Days</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>8000.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Remittance Advice Slip -->
+  <div class="remittance-slip">
+    <div class="remittance-title">
+      <span>Remittance Advice</span>
+      <span style="font-size: 8pt; font-weight: normal; color: #64748b;">Please detach and return with payment</span>
+    </div>
+    <div class="remittance-grid">
+      <div class="bank-box">
+        <strong>Direct Banking / Settlement Instructions:</strong><br>
+        Bank: <strong>Standard Bank</strong><br>
+        Account Number: <strong>071234567</strong><br>
+        Branch Code: <strong>051001</strong> (Business Current)<br>
+        Required Payment Reference: <strong>DEBT-001</strong>
+      </div>
+      <div class="slip-fields">
+        <div class="row">
+          <span>Customer Account:</span>
+          <strong>DEBT-001</strong>
+        </div>
+        <div class="row">
+          <span>Statement Date:</span>
+          <span>2026-08-31</span>
+        </div>
+        <div class="row" style="margin-top: 8px; border-top: 1px solid #cbd5e1; padding-top: 6px;">
+          <span>Total Balance Due:</span>
+          <strong style="color: #14532d; font-size: 10pt;">ZAR 6000.0000</strong>
+        </div>
+        <div class="row" style="margin-top: 6px;">
+          <span>Amount Enclosed:</span>
+          <span style="border-bottom: 1px solid #64748b; width: 100px; display: inline-block;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sha-hash">
+    Verification SHA-256: 97362dbf8cc96f3dd0e7e84646dbdef4c26ee3754cebdc9c6b1fa72121480cb1 · Certified Immutable Snapshot
+  </div>
+</body>
+</html>

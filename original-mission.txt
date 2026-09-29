@@ -1,0 +1,71 @@
+# MISSION: Architecture & Schema Design for "Shopify TradePOS & B2B Debtors"
+
+### Context & Background:
+We are an established retail ERP software company (Genesis Retail Solutions) with 25+ years of battle-tested domain depth in brick-and-mortar retail, trade counters, point-of-sale registers, and accounts receivable.
+We are now entering the Shopify ecosystem to build a standalone, high-growth B2B SaaS application. 
+
+### Market Opportunity & The Problem:
+* **The Scale:** Over 270,000 brick-and-mortar stores use Shopify POS, processing over $100 Billion in offline in-store sales (growing at 32% YoY).
+* **The Fatal Blind Spot in Shopify:** Shopify was architected for consumer eCommerce with immediate card checkout. When trade businesses (hardware stores, building materials, electrical & plumbing supply, auto spares, agricultural supply) use Shopify in-store, they hit a brick wall:
+  1. **No "Charge to Account" at POS:** Cashiers cannot let trade contractors charge to a 30-day account.
+  2. **No Debtors / AR Engine:** Shopify has no concept of credit limits, 30/60/90/120-day aged balance calculations, payment allocations, or monthly PDF statement runs.
+  3. **No Web/PC Till:** Shopify POS only runs on iPads and Android tablets. Traditional trade counters with Windows PCs, barcode scanners, and thermal receipt printers have no browser-based till.
+  4. **Shopify's Alternative is Flawed:** Shopify gates basic B2B behind Shopify Plus ($2,500/month), and even then, it only works for online self-service ordering, completely failing at the physical counter till. Existing third-party apps either act as factoring fintechs taking 3-5% transaction cuts or are basic gift-card credit tools lacking real accounting depth.
+
+### Our Assets & Domain Rules (From Genesis):
+We possess proven domain logic and mathematical rules harvested from our core modules (`genDEB`, `genTIL`, `genCOF`), including:
+1. **Debtor Aging Engine:** 8-bucket aging calculation (Current, 30, 60, 90, 120, 150, 180, Over). Credit allocation is applied oldest-debt-first (`Over -> 180 -> ... -> Current`).
+2. **Statement Generation:** Opening balance calculation, newest-first invoice reconciliation, generation of itemized monthly statements with remittance advice, and finance interest calculation on 60+ day overdue accounts.
+3. **Counter Till Controls:** Credit limit enforcement, credit hold alerts, supervisor PIN overrides for over-limit sales, mandatory capture of Customer Purchase Order (PO) Number and Job Reference on slips, and tender-integrity refunds.
+4. **Cash Office & Register Shifts:** Opening floats, shift cash drops (with reason codes), blind denomination counting (notes and coins), and automated shortage/surplus reconciliation.
+5. **Pricing Grids:** Trade price codes (Retail vs Wholesale vs Trade), volume breaks (quantity tiers), and contractor-specific price lists.
+
+### Architectural Constraint (CRITICAL):
+**DO NOT replicate the legacy Genesis Delphi/SQL Server database schema.** 
+The old Genesis database is a legacy schema (monolithic wide tables, cryptic abbreviations like `STKMaster`, `DEBMaster`, `TxTp`, string-based tenant scoping `gCO`/`gBranch`, and database triggers).
+**The new app must be engineered with modern SaaS standards:**
+* **Backend:** Python (Django REST Framework) or Node.js/TypeScript.
+* **Frontend:** Next.js (React) using Shopify Polaris design system for Admin, and Shopify POS UI Extensions / modern Web Till for cashiers.
+* **Database:** Multi-tenant PostgreSQL, cleanly normalized (3NF), indexed, and referencing Shopify Global IDs (`gid://shopify/...`).
+* **Deployment:** Fully containerized via Docker (e.g. deployed on AWS, Render, or Google Cloud Run).
+
+---
+
+### YOUR OBJECTIVES:
+
+As a Principal Software Architect and Shopify Ecosystem Expert, please deliver a comprehensive, end-to-end design blueprint covering the following 5 sections:
+
+#### Section 1: Deep Research & Gap Analysis
+1. Analyze what else a trade retailer running on Shopify needs that standard B2C POS lacks (e.g., Tax exemptions/reseller certificates, job site delivery addresses, capturing physical signatures at POS, offline queue resilience, WebUSB/WebSerial hardware drivers for thermal printers and cash drawers).
+2. What are the known pitfalls or rate limits with the Shopify GraphQL Admin API, POS UI Extensions API, and Webhook delivery, and how do we design around them?
+
+#### Section 2: Modern Relational Database Schema (PostgreSQL)
+Design a clean, normalized relational schema for our app's PostgreSQL database. Provide complete table definitions with column names, data types, foreign keys, and indexes for:
+1. **Tenant / Store Management:** Multi-tenant store installation, Shopify OAuth tokens, plan tiers, and location mapping.
+2. **Debtor Master:** Linking to Shopify Customer/Company IDs, account numbers, credit limits, credit hold flags, terms (e.g., Net 30, 7-day, COD), and billing contacts.
+3. **Debtor Ledger & Transactions:** Invoices, credit notes, account payments, journal adjustments, Dr/Cr legs, PO numbers, and unallocated amounts.
+4. **Aged Balances Snapshot:** Fast-read cache for Current, 30, 60, 90, 120+ days aging buckets per debtor account.
+5. **Statements & Runs:** Monthly statement batches, PDF generation records, delivery tracking (email/SMS), and audit logs.
+6. **Register Shifts & Cash Office:** Shift sessions, opening floats, cash drops, denomination breakdown tallies, and cashier variance logs.
+
+#### Section 3: Shopify Integration & Data Mapping Architecture
+1. **Entity Reconciliation:** Detail exactly how our database models map to Shopify's native objects:
+   * How do we link Debtor Accounts to Shopify `Customer` vs `Company` (B2B)?
+   * How do we sync and cache Shopify `ProductVariant` and `InventoryLevel` data locally (e.g., using Redis or IndexedDB) for sub-millisecond barcode scanning at the till?
+2. **Webhooks:** List the exact Shopify webhooks we must subscribe to (`orders/create`, `products/update`, `inventory_levels/update`, `customers/update`) and how to handle idempotency.
+3. **Metafields & Metaobjects:** Define the exact Shopify Metafields to store on Customer and Order objects for native Shopify visibility.
+
+#### Section 4: Frontend & Point of Sale UX Architecture
+1. **POS UI Extension (for official iPad Shopify POS):**
+   * Describe the UI flow: Smart Grid Tile -> Customer Lookup Modal -> Credit Balance / Aging Display -> PO Number Entry -> "Approve & Charge to Account" tender completion.
+2. **Standalone Web Till (for Windows PC / Browser):**
+   * Technical architecture for high-speed barcode scanning, keyboard navigation, and hardware integration (ESC/POS thermal slip printing via WebUSB/WebSerial, cash drawer triggers).
+3. **Admin Dashboard (Next.js + Shopify App Bridge):**
+   * Structure of the embedded admin portal: Debtors list, aging analysis dashboard, payment allocation screen, monthly statement emailer, and reports.
+
+#### Section 5: Phased Implementation Plan & Monetization
+1. **MVP Definition (Phase 1):** What is the tightest, highest-impact subset of features to launch on the Shopify App Store within 8–10 weeks?
+2. **Phase 2 & 3 Expansions:** Detailed roadmap for the Web Till, Advanced Price Grids, and Workshop Job Cards.
+3. **Monetization Strategy:** Tiered subscription pricing (e.g. Free Trial, $49/mo, $149/mo, $299/mo) and how to configure billing via the Shopify Billing API.
+
+Please provide thorough, concrete technical specifics, data models, and architectural patterns.

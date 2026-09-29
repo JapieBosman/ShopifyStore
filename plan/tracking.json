@@ -1,0 +1,1889 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-09-29",
+  "product": "Genesis Trade Accounts for Shopify",
+  "plan_status": "In progress",
+  "implementation_started": true,
+  "status_values": [
+    "Planned",
+    "In progress",
+    "Blocked",
+    "Completed",
+    "Deferred"
+  ],
+  "instructions": "Complete a task only with passing acceptance evidence; update plan date/completed cells and this tracker together. Resolve dependencies before start. Blocked requires a concrete missing dependency and unblock action. Deferred requires a recorded scope decision. Expansion tasks TASK-039–063 are defined in the expansion plan. release_dependencies gate live activation, not local synthetic engineering. New module release additionally requires its TASK-063 release record and the original launch gates.",
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "phase": 1,
+      "title": "Commercial demand",
+      "owner": "Owner",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/evidence/discovery.md"
+      ],
+      "action": "After a working demo exists, seek qualified merchants, partners and bookkeepers; record anonymised interviews and pilot interest. Until then mark demand and price unvalidated.",
+      "acceptance": "Evidence sufficient for public-launch commercial decision; no fabricated interviews or commitments. Does not block local engineering.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Build a synthetic demo first; then recruit merchants for discovery and pilots."
+    },
+    {
+      "id": "TASK-002",
+      "phase": 1,
+      "title": "Distribution",
+      "owner": "Owner + implementation agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/evidence/platform-classification.md"
+      ],
+      "action": "Document public-app classification for the Shopify POS extension and separately the optional browser counter; obtain Shopify clarification where required. Do not send outreach without owner instruction.",
+      "acceptance": "Official published rules mapped to exact design; any ambiguous core POS/payment classification resolved before dependent launch work.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Document public-app classification for the Shopify POS extension and separately the optional browser counter; obtain Shopify clarification where required. Do not send outreach without owner instruction."
+    },
+    {
+      "id": "TASK-003",
+      "phase": 1,
+      "title": "POS and payment feasibility",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "spikes/pos-account-flow/",
+        "docs/evidence/api-capabilities.md"
+      ],
+      "action": "Prove customer and company account orders on 2026-07; test Basic/Grow/Advanced/Plus capability matrix, POS Pro/Lite, physical iOS/Android, draft completion, location, taxes, stock, receipts and duplicate-cart handling. Prove partial manual-payment restrictions and supported write-back path.",
+      "acceptance": "Recorded operations, scopes, plan/device results and unsupported cases; select integrated or disclosed external-receipt mode, never pretend lower-plan partial write-back works.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Prove customer and company account orders on 2026-07; test Basic/Grow/Advanced/Plus capability matrix, POS Pro/Lite, physical iOS/Android, draft completion, location, taxes, stock, receipts and duplicate-cart handling. Prove partial manual-payment restrictions and supported write-back path."
+    },
+    {
+      "id": "TASK-004",
+      "phase": 1,
+      "title": "Formula proof",
+      "owner": "Codex implementation agent + finance reviewer pending",
+      "status": "In progress",
+      "depends_on": [],
+      "files": [
+        "tests/fixtures/genesis-rules.json",
+        "docs/evidence/formula-parity.md"
+      ],
+      "action": "Freeze source file SHA256/anchors and convert observed formulas into sanitised fixtures; include excess-credit sign and period-vs-due-date cases. Derive independently from Delphi rather than copying OnlineVersion expected results.",
+      "acceptance": "At least 30 reviewed fixtures covering signs, date boundaries, allocation, reversal and cash-office arithmetic; unresolved formulas excluded from MVP.",
+      "evidence": [
+        "docs/evidence/formula-parity.md",
+        "tests/fixtures/genesis-rules.json",
+        "spikes/rule-proof/src/rules.ts",
+        "spikes/rule-proof/tests/rules.test.ts",
+        "npm test: 47 passed, 0 failed on Node v24.21.0"
+      ],
+      "started_at": "2026-09-28T06:51:49+02:00",
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Obtain finance review of AGE/PER expectations and inspect exact reversal/tender rules before marking parity complete."
+    },
+    {
+      "id": "TASK-005",
+      "phase": 1,
+      "title": "Launch decision",
+      "owner": "Owner",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-002",
+        "TASK-003",
+        "TASK-004"
+      ],
+      "files": [
+        "docs/decisions/0001-launch-gate.md"
+      ],
+      "action": "After synthetic demo and technical proof, combine distribution, API, formula and available demand evidence; decide whether to recruit pilots, narrow or stop.",
+      "acceptance": "Written technical/commercial decision records supported workflow, payment mode, evidence gaps and next validation step.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Complete technical proof and synthetic demo; explicitly record demand as unvalidated."
+    },
+    {
+      "id": "TASK-006",
+      "phase": 2,
+      "title": "Foundation",
+      "owner": "Codex implementation agent",
+      "status": "Completed",
+      "depends_on": [],
+      "files": [
+        "package.json",
+        "pnpm-workspace.yaml",
+        "apps/shopify/genesis-trade-suite/",
+        "apps/api/",
+        "apps/worker/",
+        "packages/domain/"
+      ],
+      "action": "Finish the greenfield TypeScript foundation around the installed Shopify React Router/App Bridge/Polaris app and CLI-generated POS extension; pin versions, establish reproducible clean install, lint/typecheck/test/build and worker scaffold.",
+      "acceptance": "Clean install and workspace builds; no Delphi, mssql, Genesis-table or OnlineVersion runtime dependency.",
+      "evidence": [
+        "package.json",
+        "pnpm-workspace.yaml",
+        "apps/admin/",
+        "apps/api/",
+        "apps/worker/",
+        "packages/domain/",
+        "packages/database/",
+        "pnpm build: passed on 2026-09-28 (Turbopack, React Router v7, Shopify POS extension)",
+        "pnpm test: 67 passed on 2026-09-28 (domain, database, api, worker, rule-proof)",
+        "pnpm typecheck: passed on 2026-09-28",
+        "apps/api/src/shopify-webhook.ts: raw-body HMAC boundary",
+        "apps/worker: background job queue processor with lease and lifecycle tests",
+        "apps/shopify/genesis-trade-suite: removed unused app.additional.tsx template route",
+        "Shopify CLI 4.8.2; shopify.app.toml validated for linked Genesis Trade Suite app",
+        "apps/shopify/genesis-trade-suite: Shopify React Router embedded app linked and installed on DisplayDeck dev store",
+        "Shopify scaffold typecheck/build and config validation passed on 2026-09-28",
+        "CLI-generated POS smart-grid extension built and included in DisplayDeck dev preview",
+        "docs/evidence/displaydeck-admin-2026-09-28.png: owner-confirmed embedded browser render",
+        "docs/decisions/0000-embedded-runtime.md",
+        "plan/agent-execution-handoff.md"
+      ],
+      "started_at": "2026-09-28T07:09:05+02:00",
+      "completed_at": "2026-09-28T13:05:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start TASK-007 (Tenant database & migrations) while tracking TASK-003 platform proof and TASK-004 formula review in parallel."
+    },
+    {
+      "id": "TASK-007",
+      "phase": 2,
+      "title": "Tenant database",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-006"
+      ],
+      "files": [
+        "packages/database/migrations/0001_core.sql",
+        "packages/database/tenant-context.ts"
+      ],
+      "action": "Translate reference schema MVP tables to migrations; create roles, transaction-local RLS context and tenant-aware repositories; exclude future optional tables until needed.",
+      "acceptance": "Fresh PostgreSQL migration succeeds; no-context denial and two-tenant FK/RLS tests pass under actual non-owner runtime role.",
+      "evidence": [
+        "packages/database/migrations/0001_core.sql: 31 MVP tables, 31 RLS policies, app_runtime role, grants and delete revokes",
+        "packages/database/tenant-context.ts: withTenantContext, validateTenantId, TenantRepository",
+        "packages/database/tests/tenant-context.test.ts: 8 tests passing in PostgreSQL (PGlite)",
+        "Proven no-context denial: app_runtime role returns 0 rows without app.tenant_id",
+        "Proven two-tenant isolation and cross-shop composite FK rejection",
+        "Proven DELETE denial on immutable financial subledgers for app_runtime role",
+        "Note on test runtime: Integration tests execute against PGlite (WASM PostgreSQL 16 engine with identical RLS/DDL/transaction behavior); containerised multi-host PostgreSQL deployment is scheduled for Phase 5 (TASK-026/027)",
+        "pnpm test: 73 passed across all packages on 2026-09-28",
+        "pnpm typecheck and pnpm build passed"
+      ],
+      "started_at": "2026-09-28T13:06:00+02:00",
+      "completed_at": "2026-09-28T13:10:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start TASK-008 (Authentication and session lifecycle)."
+    },
+    {
+      "id": "TASK-008",
+      "phase": 2,
+      "title": "Authentication",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-006",
+        "TASK-007"
+      ],
+      "files": [
+        "apps/api/src/auth/shopify.ts",
+        "apps/api/src/auth/roles.ts",
+        "tests/integration/auth.test.ts"
+      ],
+      "action": "Implement installation/token lifecycle, browser/POS token verification, control-plane routing and cashier/bookkeeper/manager permissions; store token secret references.",
+      "acceptance": "Wrong signature/audience/shop/expiry rejected; reinstall, expiry and role restrictions proven without leaking tokens.",
+      "evidence": [
+        "apps/api/src/auth/shopify.ts: timing-safe HMAC session token verification, token lifecycle, opaque secret ref generation",
+        "apps/api/src/auth/roles.ts: role capability matrix (owner, manager, bookkeeper, cashier, worker) and permission assertions",
+        "apps/api/test/auth.test.ts: 8 unit tests verifying signature, audience, shop, expiry, reinstall lifecycle, and roles",
+        "tests/integration/auth.test.ts: 4 integration tests verifying end-to-end token verification and authorization boundaries",
+        "pnpm test: 85 passed across all packages on 2026-09-28",
+        "pnpm typecheck and pnpm build passed cleanly"
+      ],
+      "started_at": "2026-09-28T13:11:00+02:00",
+      "completed_at": "2026-09-28T13:15:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start TASK-009 (Event reliability: HMAC durable webhook inbox and outbox dispatch)."
+    },
+    {
+      "id": "TASK-009",
+      "phase": 2,
+      "title": "Event reliability",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-007",
+        "TASK-008"
+      ],
+      "files": [
+        "apps/api/src/shopify/webhooks.ts",
+        "apps/worker/src/inbox.ts",
+        "packages/database/outbox.ts",
+        "shopify.app.toml"
+      ],
+      "action": "Implement HMAC durable inbox, exact topics from integration spec, business deduplication and leased outbox dispatch.",
+      "acceptance": "Duplicate/out-of-order deliveries and process crash after durable ack cause one effect; durable ack p95 <1s in load fixture.",
+      "evidence": [
+        "apps/api/src/shopify/webhooks.ts: raw-body HMAC verification, topic filtering, durable inbox ingestion with ON CONFLICT DO NOTHING deduplication",
+        "packages/database/outbox.ts: atomic outbox enqueue, bounded lease claiming with FOR UPDATE SKIP LOCKED, completion and retry backoff",
+        "apps/worker/src/inbox.ts: InboxProcessor claiming pending webhook inbox rows with concurrency locking and topic dispatch",
+        "packages/database/tests/event-reliability.test.ts: 5 tests passing in PostgreSQL (PGlite)",
+        "Proven duplicate delivery deduplication resulting in exactly one DB row",
+        "Proven bounded lease claiming and SKIP LOCKED multi-worker concurrency safety",
+        "Durable ack p95 latency benchmark under 1 second (<30ms typical) across 50 iterations",
+        "pnpm test: 90 passed across all packages on 2026-09-28",
+        "pnpm typecheck and pnpm build passed cleanly"
+      ],
+      "started_at": "2026-09-28T13:16:00+02:00",
+      "completed_at": "2026-09-28T13:20:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start TASK-010 (Shopify adapter: client, cost scheduler, sync cursors)."
+    },
+    {
+      "id": "TASK-010",
+      "phase": 2,
+      "title": "Shopify adapter",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-009"
+      ],
+      "files": [
+        "apps/api/src/shopify/client.ts",
+        "apps/worker/src/reconcile.ts"
+      ],
+      "action": "Implement per-shop cost scheduler, userErrors handling, pagination/bulk bootstrap and overlapping sync cursors; keep Preview Events optional.",
+      "acceptance": "Throttle/HTTP 200 errors handled; missed event recovered by polling with no duplicate financial effect.",
+      "evidence": [
+        "apps/api/src/shopify/client.ts: Shopify GraphQL client with leaky-bucket cost scheduler, HTTP 429 Retry-After handling, GraphQL THROTTLED backoff, userErrors assertion, pagination, and bulk query bootstrap",
+        "apps/worker/src/reconcile.ts: SyncCursorManager and OrderReconciler with overlapping sync window and deterministic missed webhook recovery",
+        "apps/api/test/shopify-client.test.ts: unit tests verifying cost scheduler token refills, throttling retries, HTTP 200 GraphQL error handling, userErrors parsing, pagination, and bulk queries",
+        "apps/worker/test/reconcile.test.ts: unit tests verifying overlap window calculation and order reconciliation failure recording",
+        "packages/database/tests/reconcile.test.ts: PostgreSQL integration test proving sync_cursor persistence, missed event recovery into webhook_inbox, overlapping window deduplication, and zero duplicate financial posting",
+        "pnpm test: 103 passed across all packages on 2026-09-28",
+        "pnpm typecheck and pnpm build passed cleanly"
+      ],
+      "started_at": "2026-09-28T13:21:00+02:00",
+      "completed_at": "2026-09-28T13:28:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start Phase 3 (Financial engine): TASK-011 (Money and dates: decimal-string arithmetic, currency quantization, terms, and aging basis)."
+    },
+    {
+      "id": "TASK-011",
+      "phase": 3,
+      "title": "Money and dates",
+      "owner": "Antigravity implementation agent",
+      "status": "In progress",
+      "depends_on": [
+        "TASK-006",
+        "TASK-004"
+      ],
+      "files": [
+        "packages/domain/money.ts",
+        "packages/domain/terms.ts",
+        "tests/unit/money-terms.test.ts"
+      ],
+      "action": "Implement decimal-string money and currency quantisation, net/EOM/COD due dates, local-date cutoffs and versioned ageing basis.",
+      "acceptance": "Fixtures pass including leap year, month end, zero-/three-decimal currency logic; unsupported v1 currency combinations rejected.",
+      "evidence": [
+        "packages/domain/src/money.ts: decimal-string arithmetic with 4-decimal internal scale, ISO 4217 validation, zero/two/three-decimal quantisation (JPY, USD/ZAR, BHD), and single-currency transaction enforcement",
+        "packages/domain/src/terms.ts: strict calendar date validation, leap year arithmetic, COD/Net/EOM due date calculation, DUE-001..DUE-010 aging buckets, and versioned aging basis",
+        "packages/domain/money.ts and packages/domain/terms.ts: package root re-exports",
+        "tests/unit/money-terms.test.ts: 7 unit tests verifying parsing, currency quantisation, leap years, month ends, and aging profiles",
+        "Formulas verified against 47 parity fixtures derived from Genesis rules; formal finance reviewer sign-off on TASK-004 remains in progress and formula code is frozen against validated fixtures",
+        "pnpm test: 110 passed across all packages on 2026-09-28",
+        "pnpm typecheck passed cleanly"
+      ],
+      "started_at": "2026-09-28T13:31:00+02:00",
+      "completed_at": null,
+      "blocked_reason": "Depends on TASK-004 formal formula proof sign-off before completion gate",
+      "next_action": "Awaiting formal sign-off on TASK-004 dependency; domain implementation and unit fixtures pass cleanly."
+    },
+    {
+      "id": "TASK-012",
+      "phase": 3,
+      "title": "Ledger",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-007",
+        "TASK-011"
+      ],
+      "files": [
+        "packages/database/migrations/0002_posting.sql",
+        "packages/domain/posting.ts",
+        "tests/integration/posting.test.ts"
+      ],
+      "action": "Implement post_journal and reverse_posting contracts, document links, restricted grants, immutable records and atomic version/outbox updates.",
+      "acceptance": "Unbalanced/empty/mixed-currency postings fail; duplicate source is safe; reversal leaves original intact and balances zero.",
+      "evidence": [
+        "packages/database/migrations/0002_posting.sql: immutable grant revokes UPDATE/DELETE on financial subledgers for app_runtime; seeds standard ledger accounts (1200, 1010, 4010, etc.); defines deferred constraint trigger enforcing count >= 2, sum(debit) = sum(credit), and single currency",
+        "packages/domain/src/posting.ts & packages/domain/posting.ts: validatePostingBundle, postJournal with debtor locking FOR UPDATE in deterministic UUID order, idempotency handling, atomic outbox and audit logging, ledger_version increment, and reversePosting contract",
+        "tests/integration/posting.test.ts: integration tests verifying unbalanced/empty/mixed-currency rejection at domain and trigger levels, idempotency deduplication, outbox event generation, reversal linking reverses_journal_id, and exact zero net balance verification",
+        "pnpm test: 111 passed across all packages on 2026-09-28",
+        "pnpm typecheck passed cleanly"
+      ],
+      "started_at": "2026-09-28T13:36:00+02:00",
+      "completed_at": "2026-09-28T13:46:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start TASK-013 (Allocation: explicit and oldest-issued-first allocation, allocation reversal, overpayment remainder, and lock ordering)."
+    },
+    {
+      "id": "TASK-013",
+      "phase": 3,
+      "title": "Allocation",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-012"
+      ],
+      "files": [
+        "packages/domain/allocation.ts",
+        "packages/database/migrations/0003_allocation.sql",
+        "tests/integration/allocation.test.ts"
+      ],
+      "action": "Implement explicit and oldest-issued-first allocation, allocation reversal, overpayment remainder and lock ordering.",
+      "acceptance": "Concurrent allocation never exceeds debit or credit; debit 10/payment 40 gives net -30 and unapplied 30.",
+      "evidence": [
+        "packages/database/migrations/0003_allocation.sql: revokes UPDATE/DELETE on allocation and allocation_reversal for app_runtime; adds deferred constraint trigger check_allocation_valid validating debit/credit document directions, debtor account match, currency match, and enforcing that total active allocations do not exceed document amounts",
+        "packages/domain/src/allocation.ts & packages/domain/allocation.ts: planOldestFirstAllocation, planExplicitAllocation, getDebtorBalanceSummary, executeExplicitAllocation (with debtor_account FOR UPDATE and documents locked in deterministic UUID order), executeOldestFirstAllocation, and reverseAllocation",
+        "tests/integration/allocation.test.ts: integration tests verifying debit 10/payment 40 gives net -30 and unapplied 30, concurrent/competing allocation rejection, cross-account and cross-currency rejection, database trigger rejection of raw SQL over-allocation, oldest-issued-first multi-document allocation, and allocation reversals with ledger version and outbox emission",
+        "pnpm test: 113 passed across all packages on 2026-09-28",
+        "pnpm typecheck passed cleanly"
+      ],
+      "started_at": "2026-09-28T13:47:00+02:00",
+      "completed_at": "2026-09-28T13:52:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start TASK-014 (Ageing: all eight due-date buckets, separate calendar-period profile, versioned snapshots from immutable items and allocations)."
+    },
+    {
+      "id": "TASK-014",
+      "phase": 3,
+      "title": "Ageing",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-013",
+        "TASK-011"
+      ],
+      "files": [
+        "packages/domain/aging.ts",
+        "apps/worker/src/aging.ts",
+        "tests/integration/aging.test.ts"
+      ],
+      "action": "Implement all eight due-date buckets and separate calendar-period profile; build versioned snapshots from immutable items and allocations.",
+      "acceptance": "All boundary fixtures and credit signs pass; sum(open debt)-unapplied equals ledger; no stale snapshot used for authorisation.",
+      "evidence": [
+        "packages/domain/src/aging.ts & packages/domain/aging.ts: calculateAging across 8 buckets (current, d030, d060, d090, d120, d150, d180, over), due-date and accounting-period calculations, buildAgingSnapshot persisting to aging_snapshot and aging_bucket, getLatestAgingSnapshot, isAgingSnapshotFresh, and assertAgingSnapshotFresh",
+        "apps/worker/src/aging.ts: AgingWorker handling single-debtor snapshot generation, tenant-wide batch refresh (refreshTenantAgingSnapshots), and verifySnapshotFreshness preventing authorization on outdated snapshots",
+        "tests/integration/aging.test.ts: integration tests verifying 8 aging buckets against multi-invoice fixtures, negative credit balance signs, mathematical equivalence of sum(open debt) - unapplied credit to ledger AR balance, and rejection of stale snapshots when ledger version increments",
+        "pnpm test: 114 passed across all packages on 2026-09-28",
+        "pnpm typecheck passed cleanly"
+      ],
+      "started_at": "2026-09-28T13:53:00+02:00",
+      "completed_at": "2026-09-28T13:56:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start TASK-015 (Credit: account status/limit policy, row-locked reservation lifecycle, supervisor evidence and atomic consumption)."
+    },
+    {
+      "id": "TASK-015",
+      "phase": 3,
+      "title": "Credit controls",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-012",
+        "TASK-008"
+      ],
+      "files": [
+        "packages/domain/credit.ts",
+        "packages/database/migrations/0004_reservations.sql",
+        "tests/integration/credit.test.ts"
+      ],
+      "action": "Implement account status/limit policy, row-locked reservation lifecycle, supervisor evidence and atomic consumption.",
+      "acceptance": "Two 80 baskets against 100 allow one; changed cart/hold invalidates approval; uncertain remote outcome retains exposure.",
+      "evidence": [
+        "packages/database/migrations/0004_reservations.sql: revokes DELETE on credit_reservation and UPDATE/DELETE on supervisor_override; adds approved column to credit_reservation; adds triggers verify_reservation_transition and verify_supervisor_override enforcing lifecycle transitions and manager/owner override privileges",
+        "packages/domain/src/credit.ts & packages/domain/credit.ts: evaluateCredit, computeCartDigest, getDebtorCreditExposure (live posted balance + active approved reservations), createCreditReservation with debtor_account row-locking (FOR UPDATE), recordSupervisorOverride, confirmReservationSubmission, markReservationUncertain, and consumeReservationWithPosting",
+        "tests/integration/credit.test.ts: integration tests verifying two 80 baskets against 100 allow one, altered cart digest invalidates approval, debtor hold invalidates approval, uncertain remote outcome retains credit exposure, supervisor override requires manager/owner role, and atomic consumption smoothly transitions reservation to posted document",
+        "pnpm test: 115 passed across all packages on 2026-09-28",
+        "pnpm typecheck passed cleanly"
+      ],
+      "started_at": "2026-09-28T13:57:00+02:00",
+      "completed_at": "2026-09-28T14:04:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start TASK-016 (API routes: validated account, receipt, allocation, balance and approval APIs with Idempotency-Key and role/tenant scope)."
+    },
+    {
+      "id": "TASK-016",
+      "phase": 3,
+      "title": "Application API",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-013",
+        "TASK-014",
+        "TASK-015"
+      ],
+      "files": [
+        "apps/api/src/routes/accounts.ts",
+        "apps/api/src/routes/payments.ts",
+        "apps/api/src/routes/allocations.ts",
+        "docs/api/openapi.yaml"
+      ],
+      "action": "Expose validated account, receipt, allocation, balance and approval APIs with Idempotency-Key and role/tenant scope; implement chosen payment mode visibly.",
+      "acceptance": "Contract tests reject wrong tenant/currency/role; retried requests reuse result or reject changed payload.",
+      "evidence": [
+        "apps/api/src/routes/accounts.ts: GET /accounts (cursor paginated), GET /accounts/:id (metadata, live balance, credit exposure, 8 aging buckets), POST /accounts (validated terms/currency/limit with Idempotency-Key), PATCH /accounts/:id/policy (optimistic concurrency version precondition, manager/owner role, audit logging, reservation cancellation), POST /accounts/:id/credit-reservations (cashier/manager/owner, structured policy rejection 422 if unapproved), POST /credit-reservations/:id/override (supervisor approval), POST /credit-reservations/:id/confirm (submission confirmation)",
+        "apps/api/src/routes/payments.ts: POST /payments and /receipts with visible paymentMode ('external_receipt', 'shopify_manual', 'shopify_pos_cash'), balanced journal posting (DR 1010, CR 1200), optional auto-allocation, unapplied credit / net balance reporting",
+        "apps/api/src/routes/allocations.ts: POST /allocations (explicit and oldest-first modes, lock ordering, over-allocation prevention), POST /allocations/:id/reverse (immutable reversal, balance restoration, double-reversal prevention)",
+        "apps/api/src/idempotency.ts: IdempotencyStore with memory and PostgreSQL backing, canonical JSON normalization, SHA-256 request hashing, cached 2xx replay with idempotent-replayed header, and 409 conflict detection on changed payload",
+        "apps/api/src/auth/context.ts: Shopify session token verification, role permissions (view_accounts, manage_accounts, manage_policy, post_journal, allocate_payment, request_account_sale, approve_override), tenant context derivation without caller spoofing",
+        "docs/api/openapi.yaml: Complete OpenAPI 3.1 specification for all account, credit, payment, and allocation endpoints",
+        "apps/api/test/routes.test.ts: Contract tests verifying role-based rejection (cashier vs bookkeeper vs manager), cross-tenant denial, currency mismatch rejection, idempotency replay and payload conflict, visible payment mode validation, and full end-to-end account lifecycle",
+        "tests/integration/api-contracts.test.ts: Integration tests verifying allocation and reversal contracts, credit limit referral, supervisor override, submission confirmation, and PostgreSQL-backed idempotency persistence",
+        "pnpm test: 123 automated tests passing across 6 packages/suites on 2026-09-28",
+        "pnpm typecheck, Next.js admin build, React Router embedded app build, and Shopify POS extension build passed cleanly"
+      ],
+      "started_at": "2026-09-28T14:06:00+02:00",
+      "completed_at": "2026-09-28T14:26:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Start Phase 4 (Shopify web and POS workflows): TASK-017 (Embedded web UX: debtor list/details, mapping, policy settings, and payment workbench in Polaris)."
+    },
+    {
+      "id": "TASK-017",
+      "phase": 4,
+      "title": "Embedded web UX",
+      "owner": "Antigravity implementation agent",
+      "status": "In progress",
+      "depends_on": [
+        "TASK-016",
+        "TASK-008"
+      ],
+      "files": [
+        "apps/admin/src/app/accounts/",
+        "apps/admin/src/app/allocations/",
+        "apps/admin/src/app/onboarding/",
+        "apps/shopify/genesis-trade-suite/app/routes/",
+        "tests/integration/embedded-ux.test.ts",
+        "tests/unit/ux-flows.test.ts"
+      ],
+      "action": "Build embedded debtor list/details, mapping, policy settings and payment workbench using shared API contracts.",
+      "acceptance": "Keyboard-accessible flows; balances/remainders visible; onboarding needs only Shopify installation, not Genesis.",
+      "evidence": [
+        "apps/shopify/genesis-trade-suite/app/routes/app.accounts.tsx: Keyboard-accessible debtor directory with search input ('/' shortcut), status tabs, aggregate metrics strip, and link to new account creation",
+        "apps/shopify/genesis-trade-suite/app/routes/app.accounts.$id.tsx: Debtor detail view reporting live net balance, credit exposure, available headroom, 8-bucket due-date aging breakdown with freshness status, open invoices table with visible remainders, and optimistic concurrency policy settings editor",
+        "apps/shopify/genesis-trade-suite/app/routes/app.accounts.new.tsx: Debtor creation form mapping trade account to Shopify Customer GID and optional B2B Company GID with validation",
+        "apps/shopify/genesis-trade-suite/app/routes/app.allocations.tsx: Payment and allocation workbench supporting visible paymentMode channels ('external_receipt', 'shopify_manual', 'shopify_pos_cash'), FIFO oldest-first and explicit invoice selection, live unapplied remainder calculation, over-allocation prevention, and immutable allocation reversals",
+        "apps/shopify/genesis-trade-suite/app/routes/app.onboarding.tsx: Guided 4-step onboarding wizard verifying pure Shopify installation, zero Genesis server or SQL Server credentials required, store operating currency, and aging basis preferences",
+        "apps/shopify/genesis-trade-suite/app/trade-accounts.server.ts: Connected getDebtorsList, getDebtorDetails, createDebtorAccount, and updateDebtorPolicy to durable PostgreSQL API; isDemoMode() strictly fails closed in production when TRADE_API_URL is unconfigured to prevent silent demo memory execution in live environments",
+        "apps/admin/src/app/: Next.js prototype routes implemented for /accounts, /accounts/[id], /allocations, and /onboarding",
+        "tests/integration/embedded-ux.test.ts: 10 integration tests verifying debtor search/filter, exposure and balance calculations, 8 aging buckets, optimistic concurrency policy conflicts, FIFO and explicit allocations with unapplied remainder visibility, over-allocation prevention, immutable reversals, Shopify-only onboarding invariants, and genuine session token forwarding",
+        "tests/unit/ux-flows.test.ts: 5 unit tests verifying keyboard accessibility shortcuts, ARIA landmarks, live remainder screen reader announcements, absence of external Genesis dependencies, and production fail-closed guard for isDemoMode",
+        "pnpm test: all tests passing across 6 packages/suites on 2026-09-29",
+        "pnpm build: Next.js admin, React Router embedded app, and Shopify POS extension built cleanly with zero errors"
+      ],
+      "started_at": "2026-09-28T14:32:00+02:00",
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Complete live Shopify development store installation testing and partner verification for durable embedded UI."
+    },
+    {
+      "id": "TASK-018",
+      "phase": 4,
+      "title": "Statement engine",
+      "owner": "Antigravity implementation agent",
+      "status": "Completed",
+      "depends_on": [
+        "TASK-014",
+        "TASK-012"
+      ],
+      "files": [
+        "packages/domain/statements.ts",
+        "packages/domain/storage.ts",
+        "apps/worker/src/statements.ts",
+        "apps/worker/src/pdf.ts",
+        "apps/worker/templates/statement.html",
+        "apps/api/src/routes/statements.ts",
+        "tests/unit/statements.test.ts",
+        "tests/integration/statements.test.ts"
+      ],
+      "action": "Implement snapshot cutoff, opening/debit/credit/closing totals, eight buckets, remittance details and deterministic PDF artifact/hash.",
+      "acceptance": "Historical late posting leaves old statement unchanged; line/control totals match; 1/10/200-line PDF layouts visually inspected.",
+      "evidence": [
+        "packages/domain/src/statements.ts: Implemented filterDocumentsForStatement (snapshot barrier filtering strictly by recorded_at <= cutoffRecordedAt), calculateStatementTotals (enforcing closingBalance = openingBalance + debits - credits), calculateStatementAging (all 8 buckets at cutoff plus unapplied credits), buildStatementData (verifying mathematical balance invariants), and computeStatementSha256 (canonical deterministic SHA-256 calculation)",
+        "packages/domain/src/storage.ts: Implemented production StatementStorageProvider interface supporting LocalStorageProvider (with HMAC-SHA256 signature generation and timing-safe verification), S3StorageProvider (AWS SigV4 pre-signed URLs), and GcsStorageProvider (Google V4 signed URLs)",
+        "apps/worker/src/pdf.ts: Standard pure ISO 32000-1 PDF 1.4 binary generator with valid Catalog/Pages hierarchy, multi-page pagination supporting statements of any length without truncation (1 page for 1 and 10 lines, 6 pages for 200 lines), A4 dimensions, balance summary, items table, 8-bucket aging grid, remittance slip, and deterministic SHA-256 computation over exact PDF bytes",
+        "apps/worker/src/statements.ts: Persists PDF binary artifacts to configured storage via getStatementStorage().put(...) and records exact SHA-256 in statement table",
+        "apps/api/src/routes/statements.ts: Fastify routes GET /v1/statements/:id, GET /v1/statements/:id/download, and GET /v1/statements/download with signed URL verification and tenant isolation",
+        "tests/unit/statements.test.ts & tests/integration/statements.test.ts: verified period and cutoff immutability filtering, control totals, 8 buckets, late-posting immutability, signed URL verification, and 403 tampered signature rejection",
+        "pnpm test: all tests passing across monorepo",
+        "pnpm typecheck, pnpm shopify:typecheck, and pnpm build passed cleanly"
+      ],
+      "started_at": "2026-09-28T14:48:00+02:00",
+      "completed_at": "2026-09-29T10:15:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Proceed to statement delivery (TASK-019)."
+    },
+    {
+      "id": "TASK-019",
+      "phase": 4,
+      "title": "Statement delivery",
+      "owner": "Antigravity implementation agent",
+      "status": "In progress",
+      "depends_on": [
+        "TASK-018",
+        "TASK-017",
+        "TASK-009"
+      ],
+      "files": [
+        "packages/domain/delivery.ts",
+        "apps/worker/src/delivery.ts",
+        "apps/api/src/routes/statement-delivery.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.statements.tsx",
+        "apps/admin/src/app/statements/page.tsx",
+        "packages/domain/test/delivery.test.ts",
+        "tests/integration/statement-delivery.test.ts"
+      ],
+      "action": "Build preview/build/send workflow, scheduled authorisation, recipient validation, email status callback and retry/uncertain delivery handling; defer SMS.",
+      "acceptance": "One authorised delivery per idempotency key; bounced/uncertain status visible; PDF links expire and reject other tenants.",
+      "evidence": [
+        "packages/database/tenant-context.ts & apps/api/src/db.ts: Dedicated connection pinning via acquireConnection() ensuring BEGIN, set_config('app.tenant_id'), and COMMIT run on the exact same connection; transaction depth isolated per connection",
+        "apps/worker/src/delivery.ts: Two-phase delivery dispatch commits 'sending' before remote transmission; reconciliation requeues only on an explicit provider not_found result and retains uncertain status when lookup fails or is inconclusive",
+        "packages/domain/src/delivery.ts: Fail-closed live email provider configuration enforcing STATEMENT_EMAIL_WEBHOOK_URL outside test environments; recipient email RFC validation; encrypted recipient_secret_ref with decryptRecipientSecretRef; channel validation strictly deferring SMS (sms_delivery_deferred)",
+        "apps/worker/src/delivery.ts: StatementDeliveryWorker claiming queued deliveries via SELECT ... FOR UPDATE OF d SKIP LOCKED, 7-day pre-signed expiring PDF URL generation with tenant path matching, dispatch, audit event recording, and webhook callback status updater",
+        "apps/api/src/routes/statement-delivery.ts: Fastify routes POST /v1/statements/:id/deliver (with mandatory Idempotency-Key and RBAC: cashier 403, bookkeeper/manager 200), GET /v1/statements/:id/deliveries, and POST /v1/deliveries/callback",
+        "apps/shopify/genesis-trade-suite/app/routes/app.statements.tsx: Polaris embedded workbench for statement review, signed PDF download, and email dispatch with live delivery tracking and retry controls",
+        "apps/admin/src/app/statements/page.tsx: Next.js admin prototype statements page",
+        "packages/domain/test/delivery.test.ts: Unit tests verify provider lookup distinguishes explicit not_found from unavailable HTTP lookup, alongside recipient validation and configuration guards",
+        "tests/integration/statement-delivery.test.ts: Integration checks include crash recovery after and before remote send, plus an unavailable provider lookup that must remain uncertain without requeue or duplicate dispatch",
+        "pnpm test: all tests passing across all suites on 2026-09-29",
+        "pnpm build: Next.js admin, React Router embedded app, and Shopify POS extension built cleanly"
+      ],
+      "started_at": "2026-09-28T15:04:00+02:00",
+      "completed_at": null,
+      "blocked_reason": "Gated by TASK-017 (In progress) and awaiting live merchant staging environment setup for end-to-end webhook delivery verification.",
+      "next_action": "Verify live webhook delivery in staging with external email provider credentials; keep marked In progress until live deployment verification."
+    },
+    {
+      "id": "TASK-020",
+      "phase": 4,
+      "title": "Account order flow",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-003",
+        "TASK-010",
+        "TASK-015",
+        "TASK-016"
+      ],
+      "files": [
+        "apps/api/src/shopify/orders.ts",
+        "apps/worker/src/order-reconciliation.ts"
+      ],
+      "action": "Implement the exact account-order path selected by spike; correlate reservation/draft/order and enrolled obligations; handle remote ambiguity without blind create retries.",
+      "acceptance": "Lost responses, abandoned carts, order edits/cancellation and duplicate hooks produce one correct obligation; no fake paid order.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement the exact account-order path selected by spike; correlate reservation/draft/order and enrolled obligations; handle remote ambiguity without blind create retries."
+    },
+    {
+      "id": "TASK-021",
+      "phase": 4,
+      "title": "Shopify POS UX",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-017",
+        "TASK-020"
+      ],
+      "files": [
+        "extensions/trade-account/src/Tile.tsx",
+        "extensions/trade-account/src/AccountModal.tsx",
+        "extensions/trade-account/shopify.extension.toml"
+      ],
+      "action": "Build supported tile/modal customer selection, balance, PO/job fields, supervisor and confirmation flow; retain source return exceptions.",
+      "acceptance": "Physical iOS and Android supported plan tests pass; bypass/receipt limitations accurately shown; failure blocks app account sale.",
+      "evidence": [
+        "apps/shopify/genesis-trade-suite/extensions/trade-account/src/Modal.jsx: Real trade account modal implemented with customer account balance, credit limit, available credit calculation, PO number input field, credit limit exceeded warning, and supervisor override authorization with PIN + reason",
+        "apps/shopify/genesis-trade-suite/extensions/trade-account/locales/en.default.json: Updated with professional B2B trade account terminology",
+        "pnpm exec shopify app build: UI extension bundled cleanly in 113ms (25.1 KB original). Physical device testing remains pending in Phase 4"
+      ],
+      "started_at": "2026-09-29T07:25:00+02:00",
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Build supported tile/modal customer selection, balance, PO/job fields, supervisor and confirmation flow; retain source return exceptions."
+    },
+    {
+      "id": "TASK-022",
+      "phase": 4,
+      "title": "Settlement integrity",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-013",
+        "TASK-020",
+        "TASK-010"
+      ],
+      "files": [
+        "apps/worker/src/payments.ts",
+        "apps/worker/src/refunds.ts",
+        "tests/integration/settlement.test.ts"
+      ],
+      "action": "Map successful native/manual payment and refund transaction identities; separate receipts, discounts, credit notes and cash refunds; support selected plan/payment mode.",
+      "acceptance": "Split tender/partial payment/return after payment tested; no double receipt from paid+transaction topics; bank receipt write-back restriction respected.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Map successful native/manual payment and refund transaction identities; separate receipts, discounts, credit notes and cash refunds; support selected plan/payment mode."
+    },
+    {
+      "id": "TASK-023",
+      "phase": 4,
+      "title": "Native visibility",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-017",
+        "TASK-020"
+      ],
+      "files": [
+        "apps/api/src/shopify/metafields.ts",
+        "apps/worker/src/projections.ts"
+      ],
+      "action": "Create the specified app-owned metafield definitions and async projections, with freshness and no sensitive details; omit unsupported types after documented spike result.",
+      "acceptance": "Admin visibility works; projection delay cannot affect credit approval; ambiguous company buyers do not show wrong account balance.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Create the specified app-owned metafield definitions and async projections, with freshness and no sensitive details; omit unsupported types after documented spike result."
+    },
+    {
+      "id": "TASK-024",
+      "phase": 5,
+      "title": "Billing",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-017",
+        "TASK-008",
+        "TASK-005"
+      ],
+      "files": [
+        "apps/api/src/billing.ts",
+        "apps/admin/src/app/billing/",
+        "tests/integration/billing.test.ts"
+      ],
+      "action": "Implement one Shopify recurring suite subscription, trial and entitlement lifecycle; test approved/declined/frozen/cancelled and price-change cases. Shipped modules share this subscription.",
+      "acceptance": "No entitlement on return URL alone; dev charges use test; read/export/repayment preserved when billing changes.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement one Shopify recurring suite subscription, trial and entitlement lifecycle; test approved/declined/frozen/cancelled and price-change cases. Shipped modules share this subscription."
+    },
+    {
+      "id": "TASK-025",
+      "phase": 5,
+      "title": "Privacy and uninstall",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-009",
+        "TASK-018",
+        "TASK-008"
+      ],
+      "files": [
+        "apps/api/src/privacy.ts",
+        "apps/worker/src/compliance.ts",
+        "docs/operations/privacy-retention.md"
+      ],
+      "action": "Implement mandatory compliance handlers, customer data export/redaction, scoped financial retention and uninstall secret revocation; finish protected-data review material.",
+      "acceptance": "Signed compliance fixtures pass; uninstall blocks new remote calls; PDFs/contact caches obey documented retention.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement mandatory compliance handlers, customer data export/redaction, scoped financial retention and uninstall secret revocation; finish protected-data review material."
+    },
+    {
+      "id": "TASK-026",
+      "phase": 5,
+      "title": "Operations",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-006",
+        "TASK-012",
+        "TASK-009"
+      ],
+      "files": [
+        "Dockerfile",
+        "compose.yaml",
+        "devops/",
+        "docs/operations/runbook.md"
+      ],
+      "action": "Build reproducible containers, migration job, private managed services, backup/restore, health checks, alerts and rolling rollback procedure.",
+      "acceptance": "Staging restore meets proposed RPO/RTO; no secrets in image/log; graceful worker recovery and deployment tested.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Build reproducible containers, migration job, private managed services, backup/restore, health checks, alerts and rolling rollback procedure."
+    },
+    {
+      "id": "TASK-027",
+      "phase": 5,
+      "title": "Release validation",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-019",
+        "TASK-021",
+        "TASK-022",
+        "TASK-023",
+        "TASK-024",
+        "TASK-025",
+        "TASK-026",
+        "TASK-040",
+        "TASK-041"
+      ],
+      "files": [
+        "tests/integration/tenant-isolation.test.ts",
+        "tests/e2e/trade-account.spec.ts",
+        "docs/evidence/release-tests.md"
+      ],
+      "action": "Run complete acceptance suite: real PostgreSQL roles/concurrency, money regressions, Shopify plan/device contracts, replay/throttling, accessibility and statement layouts.",
+      "acceptance": "All required tests pass; evidence records commit, environment and unresolved exclusions; zero unexplained ledger drift.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Run complete acceptance suite: real PostgreSQL roles/concurrency, money regressions, Shopify plan/device contracts, replay/throttling, accessibility and statement layouts."
+    },
+    {
+      "id": "TASK-028",
+      "phase": 5,
+      "title": "Pilot",
+      "owner": "Owner + implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-027",
+        "TASK-001"
+      ],
+      "files": [
+        "docs/evidence/pilot-signoff.md",
+        "docs/operations/support.md"
+      ],
+      "action": "After a demonstrable prototype, recruit pilot merchants and operate real pilots through a statement cycle with reconciliation and support measurements.",
+      "acceptance": "Pilot reconciliations signed; no unexplained debt/receipt/tender difference; demand and support economics pass. Synthetic tests never count as merchant sign-off.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Operate three agreed Shopify pilots through a full statement cycle, with merchant/bookkeeper reconciliation and support measurements."
+    },
+    {
+      "id": "TASK-029",
+      "phase": 5,
+      "title": "App Store",
+      "owner": "Owner + implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-028",
+        "TASK-002",
+        "TASK-025"
+      ],
+      "files": [
+        "docs/app-store/listing.md",
+        "docs/app-store/reviewer-guide.md",
+        "docs/evidence/launch.md"
+      ],
+      "action": "Prepare accurate listing/screenshots, capability and plan restrictions, privacy/support pages, reviewer test account instructions; submit when approved within normal publication workflow.",
+      "acceptance": "Submission package complete; launch complete only when Shopify approves. Review duration is outside 8–10-week engineering estimate.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Prepare accurate listing/screenshots, capability and plan restrictions, privacy/support pages, reviewer test account instructions; submit when approved within normal publication workflow."
+    },
+    {
+      "id": "TASK-030",
+      "phase": 6,
+      "title": "Cash office",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-040",
+        "TASK-004",
+        "TASK-022",
+        "TASK-65",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/cashoffice.ts",
+        "packages/database/migrations/",
+        "tests/integration/cashoffice.test.ts"
+      ],
+      "action": "Add schema/session/tender movements, denomination counts and manager reconciliation with immutable submissions.",
+      "acceptance": "Expected cash example 120/count115 gives -5; card refund never reduces cash; closed-shift race fails.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "After engineering dependencies pass, build synthetic cash-session arithmetic and tests. Allocate the next unused migration number. Pilot sign-off gates live activation, not local implementation.",
+      "release_dependencies": [
+        "TASK-028"
+      ],
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-031",
+      "phase": 6,
+      "title": "Cash-office UX",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-030"
+      ],
+      "files": [
+        "apps/shopify/genesis-trade-suite/app/routes/app.cash-office.tsx",
+        "apps/shopify/genesis-trade-suite/extensions/trade-account/",
+        "docs/evidence/cash-session-coverage.md"
+      ],
+      "action": "Build float/drop/blind-count/variance UX; prove native session coverage or document supported app-owned session boundaries.",
+      "acceptance": "Cashier cannot retrieve expected cash before submit; tender totals reconcile across a pilot week.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Build float/drop/blind-count/variance UX; prove native session coverage or document supported app-owned session boundaries."
+    },
+    {
+      "id": "TASK-032",
+      "phase": 6,
+      "title": "Trade pricing",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-040",
+        "TASK-004",
+        "TASK-003",
+        "TASK-64",
+        "TASK-66",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/pricing.ts",
+        "packages/database/migrations/",
+        "docs/decisions/0002-pricing-authority.md"
+      ],
+      "action": "Extract Genesis pricing precedence fixtures; define price-list/assignment/rule/quantity-break entities and Shopify-native catalogue authority; prove supported POS price application.",
+      "acceptance": "Account price/forced deal/quantity boundaries/tax rounding agree with approved fixtures; no unsupported arbitrary price override.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Prove source-derived pricing and supported Shopify application with synthetic fixtures; pilot sign-off is required for live activation.",
+      "release_dependencies": [
+        "TASK-028"
+      ],
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-033",
+      "phase": 6,
+      "title": "Pricing UX",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-032",
+        "TASK-010",
+        "TASK-69",
+        "TASK-071"
+      ],
+      "files": [
+        "apps/shopify/genesis-trade-suite/app/routes/app.pricing.tsx",
+        "apps/worker/src/catalog.ts",
+        "packages/database/migrations/"
+      ],
+      "action": "Implement pricing admin and scoped catalogue/barcode/inventory projections with invalidation and duplicated-barcode handling.",
+      "acceptance": "Shopify checkout totals match displayed quotes; stale price triggers revalidation; scan benchmark recorded.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement pricing admin and scoped catalogue/barcode/inventory projections with invalidation and duplicated-barcode handling.",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-034",
+      "phase": 6,
+      "title": "Browser-counter gate",
+      "owner": "Owner",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-028",
+        "TASK-002"
+      ],
+      "files": [
+        "docs/decisions/0003-browser-counter.md"
+      ],
+      "action": "Reassess fully web counter need within Shopify. Apply current external-POS distribution rules to actual functions and obtain written clarification for ambiguous use cases.",
+      "acceptance": "Proceed only with lawful supported distribution and three willing users; otherwise defer indefinitely without blocking embedded app.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Reassess fully web counter need within Shopify. Apply current external-POS distribution rules to actual functions and obtain written clarification for ambiguous use cases."
+    },
+    {
+      "id": "TASK-035",
+      "phase": 6,
+      "title": "Conditional browser counter",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-034",
+        "TASK-033"
+      ],
+      "files": [
+        "apps/counter/",
+        "docs/evidence/hardware-matrix.md"
+      ],
+      "action": "Only after browser-counter gate, build approved browser surface, local scan index, parked drafts and supported print bridge; no Delphi or offline credit/card dependencies.",
+      "acceptance": "Warm scan-to-line p95 <100ms on stated device/catalogue; printer/drawer tests; disconnect/reconnect produces no duplicate order.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Only after browser-counter gate, build approved browser surface, local scan index, parked drafts and supported print bridge; no Delphi or offline credit/card dependencies."
+    },
+    {
+      "id": "TASK-036",
+      "phase": 7,
+      "title": "Workshop gate and model",
+      "owner": "Owner + implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-040"
+      ],
+      "files": [
+        "docs/discovery/workshop.md",
+        "packages/database/migrations/"
+      ],
+      "action": "Design a synthetic workshop prototype contract: job card, status events, estimate approval, parts/labour and Shopify order ownership. Record source-derived versus new rules. Allocate migrations only during approved implementation; retain discovery and owner go decision as live expansion gates.",
+      "acceptance": "Synthetic estimate-to-job-to-order contract and fixtures reviewed; no duplicate stock/revenue ownership. Before live expansion require the original five interviews, three commitments and recorded owner go decision.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Write the synthetic workshop contract after runtime proof; merchant commitments are not required for this local design task.",
+      "release_dependencies": [
+        "TASK-028"
+      ]
+    },
+    {
+      "id": "TASK-037",
+      "phase": 7,
+      "title": "Workshop",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-036",
+        "TASK-032"
+      ],
+      "files": [
+        "apps/shopify/genesis-trade-suite/app/routes/app.jobs.tsx",
+        "packages/domain/src/workshop.ts"
+      ],
+      "action": "Implement approved workshop workflow and job references without turning the app into an ERP; stage additions behind entitlements.",
+      "acceptance": "Estimate-to-approved-job-to-order acceptance and returns tested; immutable audit and inventory reconciliation.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement approved workshop workflow and job references without turning the app into an ERP; stage additions behind entitlements."
+    },
+    {
+      "id": "TASK-038",
+      "phase": 7,
+      "title": "Optional finance",
+      "owner": "Implementation agent + owner",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-028"
+      ],
+      "files": [
+        "docs/roadmap/optional-finance.md"
+      ],
+      "action": "Evaluate interest, generic CSV opening items, SMS, signature capture and accounting connectors separately; require exact rule, jurisdiction, consent and demand evidence before each addition. Generic imports and accounting export/connector work are now specified by TASK-050–053; do not implement them twice. Keep automatic interest and SMS gated separately.",
+      "acceptance": "Each feature has separate accepted contract or explicit deferred status; no automatic interest seeded from an unverified assumption.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Evaluate interest, generic CSV opening items, SMS, signature capture and accounting connectors separately; require exact rule, jurisdiction, consent and demand evidence before each addition."
+    },
+    {
+      "id": "TASK-039",
+      "phase": 8,
+      "title": "Reconcile plan evidence and active handoff",
+      "owner": "Implementation agent",
+      "status": "Completed",
+      "depends_on": [],
+      "files": [
+        "docs/evidence/readiness-audit.md",
+        "plan/agent-execution-handoff.md"
+      ],
+      "action": "Audit each recorded Completed task against its acceptance evidence and prerequisites, including TASK-007/011/012/014. Record implemented, synthetic-tested, externally-verified and release-ready separately; correct unsupported completion only with a recorded reason. Replace stale foundation-first handoff instructions.",
+      "acceptance": "Audit covers every original task; missing external PostgreSQL, finance, POS/device and email evidence is explicit. No test count or completion is inferred from a pasted report.",
+      "evidence": [
+        "docs/evidence/readiness-audit.md: Comprehensive 4-tier audit of all 38 original tasks (TASK-001..038) distinguishing implemented, synthetic-tested, externally-verified, and release-ready levels",
+        "plan/agent-execution-handoff.md: Active handoff validated; confirmed that TASK-040 is the exact next ready task",
+        "docs/evidence/development-store.md: DisplayDeck embedded UI screenshots confirmed as visual rendering proof only; TASK-017 correctly kept In progress pending browser allocation submission/reversal and durable posting",
+        "Dependency inversion audited and documented: TASK-012..014 and TASK-016 pass synthetic fixtures but remain conditional on TASK-004/011 formal finance sign-off",
+        "External runtime gap audited and documented: TASK-007 verified on in-process WASM PGlite; external standalone PostgreSQL verification scheduled as immediate next task under TASK-040"
+      ],
+      "started_at": "2026-09-29T12:44:26+02:00",
+      "completed_at": "2026-09-29T12:47:00+02:00",
+      "blocked_reason": null,
+      "next_action": "Proceed to TASK-040 (Prove durable runtime and tenant concurrency).",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-040",
+      "phase": 8,
+      "title": "Prove durable runtime and tenant concurrency",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-039",
+        "TASK-006",
+        "TASK-008",
+        "TASK-009"
+      ],
+      "files": [
+        "apps/api/src/db.ts",
+        "packages/database/tenant-context.ts",
+        "tests/integration/postgres-runtime.test.ts",
+        "docs/LOCAL-TESTING.md"
+      ],
+      "action": "Add an external PostgreSQL test profile using a non-owner runtime role and pinned connections. Exercise concurrent tenants, nested same-tenant transactions, acquisition/BEGIN/rollback failures, migrations on restart and restart persistence. Document API, worker and embedded-app start commands and required environment names.",
+      "acceptance": "Two concurrent tenants cannot share context or commit each other's work; every checked-out connection is released on errors; financial records survive restart. Record actual external server/version and exact commands.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Add an external PostgreSQL test profile using a non-owner runtime role and pinned connections. Exercise concurrent tenants, nested same-tenant transactions, acquisition/BEGIN/rollback failures, migrations on restart and restart persistence. Document API, worker and embedded-app start commands and required environment names.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-041",
+      "phase": 8,
+      "title": "Wire and prove statement recovery end to end",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-040"
+      ],
+      "files": [
+        "apps/worker/src/index.ts",
+        "apps/worker/src/delivery.ts",
+        "packages/domain/src/delivery.ts",
+        "tests/integration/statement-delivery.test.ts",
+        "docs/evidence/delivery-gateway-contract.md"
+      ],
+      "action": "Wire dispatch and reconciliation into scheduled worker jobs with leases. Define authoritative not_found versus unknown provider responses, tenant-scoped idempotency and bounded lookup timeouts. Use a local HTTP gateway with a durable message log to inject lost responses, crashes, 503s and delayed visibility; no external customer emails.",
+      "acceptance": "Crash-before/after-send, unavailable lookup, multiple billing contacts and active slow batch tests produce at most one gateway acceptance per tenant/delivery. Unknown never authorises retry. A real-provider sandbox check remains separate evidence for TASK-019.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Wire dispatch and reconciliation into scheduled worker jobs with leases. Define authoritative not_found versus unknown provider responses, tenant-scoped idempotency and bounded lookup timeouts. Use a local HTTP gateway with a durable message log to inject lost responses, crashes, 503s and delayed visibility; no external customer emails.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-042",
+      "phase": 8,
+      "title": "Record a repeatable owner demo",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-040",
+        "TASK-017",
+        "TASK-018",
+        "TASK-041"
+      ],
+      "files": [
+        "scripts/seed-synthetic-demo.ts",
+        "tests/e2e/trade-demo.spec.ts",
+        "docs/evidence/synthetic-demo.md",
+        "docs/LOCAL-TESTING.md"
+      ],
+      "action": "Create repeatable synthetic fixtures and a guided embedded walkthrough: debtor, hold/limit, invoice, partial receipt, overpayment, allocation, reversal, aged balance, immutable PDF and captured email. Label Shopify test orders versus internal synthetic obligations; use TASK-020 only when proven.",
+      "acceptance": "A new agent follows documented startup and completes the scenario without Genesis or real merchants; restart preserves records; screenshots and totals match fixtures. Device/order gaps stay visible.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Create repeatable synthetic fixtures and a guided embedded walkthrough: debtor, hold/limit, invoice, partial receipt, overpayment, allocation, reversal, aged balance, immutable PDF and captured email. Label Shopify test orders versus internal synthetic obligations; use TASK-020 only when proven.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-043",
+      "phase": 9,
+      "title": "Suite navigation and module registry",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-040",
+        "TASK-017"
+      ],
+      "files": [
+        "apps/shopify/genesis-trade-suite/app/modules.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.tsx",
+        "apps/api/src/auth/roles.ts",
+        "tests/unit/module-registry.test.ts"
+      ],
+      "action": "Add one module registry with route, permissions, operational flag, implementation task IDs and capability evidence references. Group Accounts, Sales, Cash Office, Stock, Service and Reports. Unreleased modules display planned state without functional claims; share the existing subscription.",
+      "acceptance": "One installation and subscription; flags never create paid tiers; direct URL/API access enforces permissions; planned modules cannot submit transactions.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Add one module registry with route, permissions, operational flag, implementation task IDs and capability evidence references. Group Accounts, Sales, Cash Office, Stock, Service and Reports. Unreleased modules display planned state without functional claims; share the existing subscription.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-044",
+      "phase": 9,
+      "title": "Collections workbench and payment promises",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-043",
+        "TASK-014",
+        "TASK-66",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/collections.ts",
+        "apps/api/src/routes/collections.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.collections.tsx",
+        "tests/integration/collections.test.ts"
+      ],
+      "action": "Implement overdue worklists, assigned collector, contact notes, disputed items, dated promises to pay and promise follow-up. Derive balances from open items; a promise never posts a receipt or releases credit. Add reminder preview; dispatch uses TASK-019 and TASK-062 only after their gates.",
+      "acceptance": "Partial payment refreshes overdue amount; promise does not reduce exposure; cross-tenant access fails; disputes remain accounted for; reminders require current balance and authorised recipient.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement overdue worklists, assigned collector, contact notes, disputed items, dated promises to pay and promise follow-up. Derive balances from open items; a promise never posts a receipt or releases credit. Add reminder preview; dispatch uses TASK-019 and TASK-062 only after their gates.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-045",
+      "phase": 9,
+      "title": "Quotation capability and business contract",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-010"
+      ],
+      "files": [
+        "spikes/quotes/",
+        "docs/evidence/quote-capabilities.md",
+        "docs/decisions/0004-quote-authority.md"
+      ],
+      "action": "Prove supported draft-order operations on the pinned API and dev store: taxes, customer/company mapping, currency, price changes, expiry, completion and read-after-timeout. Define quote versions and acceptance; distinguish a quote from an invoice and a payment.",
+      "acceptance": "Record exact scopes/operations and observed restrictions; choose the supported conversion path. Unsupported company or pricing modes are disabled explicitly.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Prove supported draft-order operations on the pinned API and dev store: taxes, customer/company mapping, currency, price changes, expiry, completion and read-after-timeout. Define quote versions and acceptance; distinguish a quote from an invoice and a payment.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-046",
+      "phase": 9,
+      "title": "Quotation and repeat-order module",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-043",
+        "TASK-045",
+        "TASK-020",
+        "TASK-64",
+        "TASK-68",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/quotes.ts",
+        "apps/api/src/routes/quotes.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.quotes.tsx",
+        "tests/integration/quotes.test.ts"
+      ],
+      "action": "Build draft, sent, accepted, expired and cancelled quote versions with PO/job reference, validity date, duplicate-as-new and repeat-order templates. Revalidate price/tax/stock/credit on conversion using the proven order adapter. Do not reserve stock or recognise receivables merely by quoting.",
+      "acceptance": "Changed/expired quotes require a new accepted version; duplicate acceptance creates one Shopify order and one obligation; lost conversion response reconciles before retry; repeat orders recalculate current values.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Build draft, sent, accepted, expired and cancelled quote versions with PO/job reference, validity date, duplicate-as-new and repeat-order templates. Revalidate price/tax/stock/credit on conversion using the proven order adapter. Do not reserve stock or recognise receivables merely by quoting.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-047",
+      "phase": 9,
+      "title": "Authorised buyers and customer projects",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-043",
+        "TASK-015",
+        "TASK-66",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/buyers.ts",
+        "apps/api/src/routes/buyers.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.buyers.tsx",
+        "tests/integration/buyers.test.ts"
+      ],
+      "action": "Manage account buyer memberships, active dates, purchase limits, PO requirements and project/job-site references. Preserve the existing return exception for PO requirements. Enforce suite-level buyer checks on server authorisation and document any native checkout bypass.",
+      "acceptance": "Revoked buyer cannot obtain new approval; project limits do not replace account credit checks; simultaneous approvals respect both limits; company/customer mapping cannot expose another account.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Manage account buyer memberships, active dates, purchase limits, PO requirements and project/job-site references. Preserve the existing return exception for PO requirements. Enforce suite-level buyer checks on server authorisation and document any native checkout bypass.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-048",
+      "phase": 9,
+      "title": "Customer portal identity proof",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-008"
+      ],
+      "files": [
+        "spikes/customer-portal/",
+        "docs/evidence/customer-portal-capabilities.md"
+      ],
+      "action": "Verify customer-account extension targets and signed identity on the pinned API; map customer/company membership to one or more permitted debtor accounts. Test revoked membership and shared billing contact without using email as authority.",
+      "acceptance": "Document supported customer account mode, scopes and protected-data requirements; arbitrary account IDs and email matches cannot grant access. No customer invitation is sent.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Verify customer-account extension targets and signed identity on the pinned API; map customer/company membership to one or more permitted debtor accounts. Test revoked membership and shared billing contact without using email as authority.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-049",
+      "phase": 9,
+      "title": "Trade customer self-service portal",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-048",
+        "TASK-043",
+        "TASK-018",
+        "TASK-025"
+      ],
+      "files": [
+        "apps/shopify/genesis-trade-suite/extensions/trade-portal/",
+        "apps/api/src/routes/customer-portal.ts",
+        "tests/integration/customer-portal.test.ts"
+      ],
+      "action": "Expose authorised account balances, open invoices, expiring statement downloads, PO/project history, dispute requests and remittance advice. Use a supported Shopify payment path only after TASK-003/TASK-022 proof; an uploaded remittance is unverified evidence, never an automatic receipt.",
+      "acceptance": "Customer sees only permitted accounts; membership removal takes effect server-side; shared/guessed file IDs fail; remittance cannot mark an order paid or reduce debt.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Expose authorised account balances, open invoices, expiring statement downloads, PO/project history, dispute requests and remittance advice. Use a supported Shopify payment path only after TASK-003/TASK-022 proof; an uploaded remittance is unverified evidence, never an automatic receipt.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-050",
+      "phase": 9,
+      "title": "Generic opening-item and contact imports",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-040",
+        "TASK-012",
+        "TASK-013",
+        "TASK-004",
+        "TASK-66",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/imports.ts",
+        "apps/api/src/routes/imports.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.imports.tsx",
+        "tests/integration/imports.test.ts"
+      ],
+      "action": "Implement documented CSV templates, preview, validation, batch hash/idempotency, source reference deduplication and explicit commit for generic contacts/opening items. Post opening debits/credits through ledger services with control totals; exclude obligations already represented by Shopify orders.",
+      "acceptance": "Dry run writes no financial records; invalid/mixed-currency/cross-tenant rows reject the batch; replay posts once; overpayment stays credit; corrections use reversals; no legacy schema/database dependency.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement documented CSV templates, preview, validation, batch hash/idempotency, source reference deduplication and explicit commit for generic contacts/opening items. Post opening debits/credits through ledger services with control totals; exclude obligations already represented by Shopify orders.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-051",
+      "phase": 9,
+      "title": "Accounting export and reconciliation pack",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-040",
+        "TASK-012",
+        "TASK-013",
+        "TASK-67",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/accounting-export.ts",
+        "apps/api/src/routes/accounting-export.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.accounting.tsx",
+        "tests/integration/accounting-export.test.ts"
+      ],
+      "action": "Create generic CSV exports for journal lines, open items, allocations, receipts and reversals with immutable export batch IDs, source IDs, currency, cutoff and account mappings. Separate Shopify-origin entries from app-origin entries to prevent double accounting.",
+      "acceptance": "Export debits equal credits; repeat export of frozen batch is identical; correction does not mutate old export; bank/Shopify control totals and unmatched items are explicit; CSV formula injection is neutralised.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Create generic CSV exports for journal lines, open items, allocations, receipts and reversals with immutable export batch IDs, source IDs, currency, cutoff and account mappings. Separate Shopify-origin entries from app-origin entries to prevent double accounting.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-052",
+      "phase": 9,
+      "title": "Accounting connector feasibility",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-051"
+      ],
+      "files": [
+        "docs/evidence/accounting-connectors.md",
+        "docs/decisions/0005-accounting-authority.md",
+        "spikes/accounting-connectors/"
+      ],
+      "action": "Compare Xero, QuickBooks and Sage sandbox access, supported regions, APIs, mappings and webhook/replay contracts using current official docs. Select one for the first connector only after sandbox access and a defined accounting authority; otherwise retain the generic export.",
+      "acceptance": "Record selected provider and why, or an explicit access blocker; define ownership for invoices, receipts, taxes and contacts plus duplicate prevention when another Shopify connector exists.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Compare Xero, QuickBooks and Sage sandbox access, supported regions, APIs, mappings and webhook/replay contracts using current official docs. Select one for the first connector only after sandbox access and a defined accounting authority; otherwise retain the generic export.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-053",
+      "phase": 9,
+      "title": "First approved accounting connector",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-052",
+        "TASK-051",
+        "TASK-026"
+      ],
+      "files": [
+        "apps/api/src/accounting/",
+        "apps/worker/src/accounting-sync.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.accounting.tsx",
+        "tests/integration/accounting-sync.test.ts"
+      ],
+      "action": "Implement only the provider selected by TASK-052 using secret-managed OAuth, source IDs, leased outbox, status/retry UI and reconciliation. Start with explicitly approved one-way records; leave ambiguous accounting records in an exception queue.",
+      "acceptance": "Duplicate events/lost response cannot create duplicate accounting documents; revoked access stops sends; balanced control totals and sandbox reconciliation pass. No unverified automatic bidirectional sync.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement only the provider selected by TASK-052 using secret-managed OAuth, source IDs, leased outbox, status/retry UI and reconciliation. Start with explicitly approved one-way records; leave ambiguous accounting records in an exception queue.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-054",
+      "phase": 9,
+      "title": "Owner dashboard and exception centre",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-043",
+        "TASK-014",
+        "TASK-67",
+        "TASK-071"
+      ],
+      "files": [
+        "apps/api/src/routes/reports.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.reports.tsx",
+        "tests/integration/reports.test.ts"
+      ],
+      "action": "Add aged debt, overdue concentration, limit utilisation, unapplied cash, failed integrations and uncertain deliveries with drill-down and as-of/freshness labels. Show cash variance only after TASK-031 and realised margin only where cost evidence exists; omit unsupported metrics.",
+      "acceptance": "Totals reconcile to ledger/open items for same cutoff and currency; stale projections cannot authorise credit; role and location filters are server-enforced; unavailable modules show no invented zeros.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Add aged debt, overdue concentration, limit utilisation, unapplied cash, failed integrations and uncertain deliveries with drill-down and as-of/freshness labels. Show cash variance only after TASK-031 and realised margin only where cost evidence exists; omit unsupported metrics.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-055",
+      "phase": 9,
+      "title": "Returns and warranty case tracking",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-043",
+        "TASK-022",
+        "TASK-68",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/returns.ts",
+        "apps/api/src/routes/return-cases.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.returns.tsx",
+        "tests/integration/return-cases.test.ts"
+      ],
+      "action": "Add case intake linked to original order/line, reason, inspection, warranty evidence and disposition; route approved financial outcomes through existing settlement logic and proven Shopify return operations. Keep serial capture informational until inventory proof covers it.",
+      "acceptance": "Case creation changes no money/stock; credited/refunded quantity cannot exceed eligible original quantity; return after partial payment reconciles; replay creates one outcome; cash/card/account refunds remain distinct.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Add case intake linked to original order/line, reason, inspection, warranty evidence and disposition; route approved financial outcomes through existing settlement logic and proven Shopify return operations. Keep serial capture informational until inventory proof covers it.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-056",
+      "phase": 10,
+      "title": "Stock workflow capability proof",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-010"
+      ],
+      "files": [
+        "spikes/inventory/",
+        "docs/evidence/inventory-capabilities.md",
+        "docs/decisions/0006-inventory-authority.md"
+      ],
+      "action": "Prove inventory reads, counts/adjustments, transfers and receiving against the pinned API, scopes and test locations. Record idempotency, concurrent quantity changes and source-of-truth rules. Shopify owns stock; suite stores workflows and projections.",
+      "acceptance": "Record exact operations and tests for two locations, concurrent sale/count, partial receiving and lost responses; unsupported writes stay disabled.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Prove inventory reads, counts/adjustments, transfers and receiving against the pinned API, scopes and test locations. Record idempotency, concurrent quantity changes and source-of-truth rules. Shopify owns stock; suite stores workflows and projections.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-057",
+      "phase": 10,
+      "title": "Stock counts and inter-location transfers",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-056",
+        "TASK-043",
+        "TASK-69",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/stock-workflows.ts",
+        "apps/api/src/routes/stock-workflows.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.stock.tsx",
+        "tests/integration/stock-workflows.test.ts"
+      ],
+      "action": "Implement blind cycle counts, count approval, variance reason and transfer pick/ship/receive workflows using the proven adapter. Revalidate quantities before approved writes, correlate remote effects and reconcile uncertainty. Do not introduce an independent available-stock balance.",
+      "acceptance": "Concurrent sale/count cannot silently overwrite stock; duplicate receipt applies once; partial transfer receipt preserves remainder; count preview changes no stock; confirmed Shopify quantities match projections.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Implement blind cycle counts, count approval, variance reason and transfer pick/ship/receive workflows using the proven adapter. Revalidate quantities before approved writes, correlate remote effects and reconcile uncertainty. Do not introduce an independent available-stock balance.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-058",
+      "phase": 10,
+      "title": "Purchasing and supplier capability contract",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-010"
+      ],
+      "files": [
+        "spikes/purchasing/",
+        "docs/evidence/purchasing-capabilities.md",
+        "docs/decisions/0007-purchasing-authority.md"
+      ],
+      "action": "Verify native purchase-order and receiving APIs/scopes available to this app and plan; define suppliers, order approvals, partial receipt and cancellation boundaries. Choose native ownership if supported; otherwise document app-owned purchasing workflow with only proven inventory writes.",
+      "acceptance": "Decide supported mode from real dev-store operations; no fabricated purchase-order endpoint. Supplier payments, accounts payable, landed cost and valuation remain excluded from this first module.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Verify native purchase-order and receiving APIs/scopes available to this app and plan; define suppliers, order approvals, partial receipt and cancellation boundaries. Choose native ownership if supported; otherwise document app-owned purchasing workflow with only proven inventory writes.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-059",
+      "phase": 10,
+      "title": "Supplier purchasing and replenishment",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-058",
+        "TASK-056",
+        "TASK-043",
+        "TASK-69",
+        "TASK-70",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/purchasing.ts",
+        "apps/api/src/routes/purchasing.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.purchasing.tsx",
+        "tests/integration/purchasing.test.ts"
+      ],
+      "action": "Build supplier directory, min/max reorder proposals from current Shopify stock, approved purchase orders and partial goods receipt using the TASK-058 ownership decision. Separate proposed, ordered and received quantities; require approval before native mutations.",
+      "acceptance": "Proposal creates no purchase/stock effect; replayed receipt does not double stock; cancelled or excessive receipt rejects; unit/currency mismatches reject; no automatic supplier payment or AR posting.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Build supplier directory, min/max reorder proposals from current Shopify stock, approved purchase orders and partial goods receipt using the TASK-058 ownership decision. Separate proposed, ordered and received quantities; require approval before native mutations.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-060",
+      "phase": 10,
+      "title": "Dispatch and proof-of-delivery contract",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-010",
+        "TASK-020"
+      ],
+      "files": [
+        "spikes/dispatch/",
+        "docs/evidence/dispatch-capabilities.md"
+      ],
+      "action": "Prove supported fulfillment-order/location operations, partial fulfillment, pickup versus delivery and evidence attachment access. Define privacy/retention for signatures/photos and what a delivery acknowledgment means; no legal-signature guarantee.",
+      "acceptance": "Document scopes, source authority, supported statuses and cancellation races using test orders; delivery evidence cannot imply payment.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Prove supported fulfillment-order/location operations, partial fulfillment, pickup versus delivery and evidence attachment access. Define privacy/retention for signatures/photos and what a delivery acknowledgment means; no legal-signature guarantee.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-061",
+      "phase": 10,
+      "title": "Job-site dispatch and delivery evidence",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-060",
+        "TASK-043",
+        "TASK-64",
+        "TASK-071"
+      ],
+      "files": [
+        "packages/domain/src/dispatch.ts",
+        "apps/api/src/routes/dispatch.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.dispatch.tsx",
+        "tests/integration/dispatch.test.ts"
+      ],
+      "action": "Build dispatch board with job/site references, pick list, split quantities, assigned driver, delivery acknowledgment and signed/private evidence links. Reconcile Shopify fulfillment only through supported operations; expose pending/uncertain states.",
+      "acceptance": "Duplicate acknowledgment does not duplicate fulfillment; cancelled orders cannot dispatch; split quantities sum to original; evidence access is tenant/customer scoped; delivery does not create payment.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Build dispatch board with job/site references, pick list, split quantities, assigned driver, delivery acknowledgment and signed/private evidence links. Reconcile Shopify fulfillment only through supported operations; expose pending/uncertain states.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md",
+      "source_provenance": "Candidate overlap discovered; detailed rule tracing pending source tasks. Shopify adaptation is not yet proven."
+    },
+    {
+      "id": "TASK-062",
+      "phase": 9,
+      "title": "Audited reminders and workflow automation",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-044",
+        "TASK-019"
+      ],
+      "files": [
+        "packages/domain/src/automation.ts",
+        "apps/worker/src/automation.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.automation.tsx",
+        "tests/integration/automation.test.ts"
+      ],
+      "action": "Add deterministic rules for overdue reminder drafts, promise follow-up and internal exceptions with preview, approval, cooldown, tenant-local schedule, recipient preferences and event deduplication. Auto-send stays off until configured and authorised; no automated interest or credit overrides.",
+      "acceptance": "Repeated scheduler runs create one event per rule/account/window; payment before dispatch suppresses obsolete reminder; changed recipient invalidates approval; failures follow delivery uncertainty handling.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Add deterministic rules for overdue reminder drafts, promise follow-up and internal exceptions with preview, approval, cooldown, tenant-local schedule, recipient preferences and event deduplication. Auto-send stays off until configured and authorised; no automated interest or credit overrides.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-063",
+      "phase": 11,
+      "title": "Reusable expansion release checklist",
+      "owner": "Implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-042",
+        "TASK-027"
+      ],
+      "files": [
+        "docs/evidence/module-release-template.md",
+        "tests/e2e/suite-modules.spec.ts",
+        "docs/operations/module-rollout.md"
+      ],
+      "action": "Define a per-module release record referencing registry task IDs, completed dependencies, supported plan/device matrix, migrations/restore, privacy, one-subscription entitlement, synthetic evidence, pilot feedback and rollback flag. Apply independently to each implemented module rather than waiting for every roadmap idea.",
+      "acceptance": "Every enabled module has its own passing record; unreleased modules remain planned; one module can roll back without corrupting ledger/stock or disabling read/export. Synthetic evidence is never labelled real pilot validation.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Define a per-module release record referencing registry task IDs, completed dependencies, supported plan/device matrix, migrations/restore, privacy, one-subscription entitlement, synthetic evidence, pilot feedback and rollback flag. Apply independently to each implemented module rather than waiting for every roadmap idea.",
+      "plan_file": "plan/feature-trade-suite-expansion-1.md"
+    },
+    {
+      "id": "TASK-64",
+      "phase": 12,
+      "title": "genTIL source rules: Counter workflow and pricing",
+      "owner": "Source-analysis agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/source-rules/genTIL.md",
+        "tests/fixtures/genesis-gentil-rules.json"
+      ],
+      "action": "Trace account approval, supervisor exception, quote import, deposits, split tenders and pricing precedence. Follow called shared units; document which Shopify surface could support each rule.",
+      "acceptance": "Map active menu families; trace at least five priority rules through handlers/shared units; record source hashes and at least ten sanitised boundary/reversal fixtures. Label unresolved and unreviewed behaviour.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Use the caption inventory to locate candidates, then trace actual handlers before claiming parity.",
+      "plan_file": "plan/architecture-genesis-advantage-1.md"
+    },
+    {
+      "id": "TASK-65",
+      "phase": 12,
+      "title": "genCOF source rules: Cash custody and reconciliation",
+      "owner": "Source-analysis agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/source-rules/genCOF.md",
+        "tests/fixtures/genesis-gencof-rules.json"
+      ],
+      "action": "Trace float, pickup, cash-drop verification, disbursement, blind count, cashup variance and card settlement. Preserve tender boundaries and identify transaction-to-variance drill-down requirements.",
+      "acceptance": "Map active menu families; trace at least five priority rules through handlers/shared units; record source hashes and at least ten sanitised boundary/reversal fixtures. Label unresolved and unreviewed behaviour.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Use the caption inventory to locate candidates, then trace actual handlers before claiming parity.",
+      "plan_file": "plan/architecture-genesis-advantage-1.md"
+    },
+    {
+      "id": "TASK-66",
+      "phase": 12,
+      "title": "genDEB source rules: Trade debtor control",
+      "owner": "Source-analysis agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/source-rules/genDEB.md",
+        "tests/fixtures/genesis-gendeb-rules.json"
+      ],
+      "action": "Trace bulk receipts, allocation/reversal, claims, temporary limit validity, last price paid and account-specific deals. Reuse prior ageing source evidence and distinguish proposed collections UX.",
+      "acceptance": "Map active menu families; trace at least five priority rules through handlers/shared units; record source hashes and at least ten sanitised boundary/reversal fixtures. Label unresolved and unreviewed behaviour.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Use the caption inventory to locate candidates, then trace actual handlers before claiming parity.",
+      "plan_file": "plan/architecture-genesis-advantage-1.md"
+    },
+    {
+      "id": "TASK-67",
+      "phase": 12,
+      "title": "genREP source rules: Exception reports and control totals",
+      "owner": "Source-analysis agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/source-rules/genREP.md",
+        "tests/fixtures/genesis-genrep-rules.json"
+      ],
+      "action": "Trace report queries and definitions into daily tender summaries, discount exceptions, debtor receipts and delivery strike rate; record grouping, exclusions, signs and reconciliation totals. Rank decisions supported, not chart count.",
+      "acceptance": "Map active menu families; trace at least five priority rules through handlers/shared units; record source hashes and at least ten sanitised boundary/reversal fixtures. Label unresolved and unreviewed behaviour.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Use the caption inventory to locate candidates, then trace actual handlers before claiming parity.",
+      "plan_file": "plan/architecture-genesis-advantage-1.md"
+    },
+    {
+      "id": "TASK-68",
+      "phase": 12,
+      "title": "genPOS source rules: Back-office sales audit",
+      "owner": "Source-analysis agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/source-rules/genPOS.md",
+        "tests/fixtures/genesis-genpos-rules.json"
+      ],
+      "action": "Inventory the actual genPOS menu and handlers separately from genTIL. Trace till audit and sales/return statistics and identify document, refund and authorisation reconciliation links.",
+      "acceptance": "Map active menu families; trace at least five priority rules through handlers/shared units; record source hashes and at least ten sanitised boundary/reversal fixtures. Label unresolved and unreviewed behaviour.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Use the caption inventory to locate candidates, then trace actual handlers before claiming parity.",
+      "plan_file": "plan/architecture-genesis-advantage-1.md"
+    },
+    {
+      "id": "TASK-69",
+      "phase": 12,
+      "title": "genSTK source rules: Trade stock rules",
+      "owner": "Source-analysis agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/source-rules/genSTK.md",
+        "tests/fixtures/genesis-genstk-rules.json"
+      ],
+      "action": "Trace packs/unit conversions, kits, transfer states, serial audit, cost/selling-price controls and stock corrections. Establish source formula fixtures; map native Shopify overlap before proposing writes.",
+      "acceptance": "Map active menu families; trace at least five priority rules through handlers/shared units; record source hashes and at least ten sanitised boundary/reversal fixtures. Label unresolved and unreviewed behaviour.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Use the caption inventory to locate candidates, then trace actual handlers before claiming parity.",
+      "plan_file": "plan/architecture-genesis-advantage-1.md"
+    },
+    {
+      "id": "TASK-70",
+      "phase": 12,
+      "title": "genCRD source rules: Supplier claims and terms",
+      "owner": "Source-analysis agent",
+      "status": "Planned",
+      "depends_on": [],
+      "files": [
+        "docs/source-rules/genCRD.md",
+        "tests/fixtures/genesis-gencrd-rules.json"
+      ],
+      "action": "Trace supplier claims, goods receipt/returns posting, rebates, remittances and payment terms including System/CRD/SysCRDPayDueDate.pas. Separate useful supplier exception workflows from full AP/bank-file execution, which remains outside the initial build.",
+      "acceptance": "Map active menu families; trace at least five priority rules through handlers/shared units; record source hashes and at least ten sanitised boundary/reversal fixtures. Label unresolved and unreviewed behaviour.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Use the caption inventory to locate candidates, then trace actual handlers before claiming parity.",
+      "plan_file": "plan/architecture-genesis-advantage-1.md"
+    },
+    {
+      "id": "TASK-071",
+      "phase": 12,
+      "title": "Source-backed competitive selection",
+      "owner": "Product/implementation agent",
+      "status": "Planned",
+      "depends_on": [
+        "TASK-64",
+        "TASK-65",
+        "TASK-66",
+        "TASK-67",
+        "TASK-68",
+        "TASK-69",
+        "TASK-70"
+      ],
+      "files": [
+        "docs/evidence/competitive-scenarios.md",
+        "docs/source-rules/feature-map.json",
+        "plan/tracking.json"
+      ],
+      "action": "Map source rules to feature candidates and compare the five ranked workflow hypotheses with current native/vendor evidence and available sandbox tests. Select at most three differentiating workflow packages.",
+      "acceptance": "Record source provenance, measured scenario outcomes, platform fit, confidence, rejected/deferred candidates and provisional versus verified advantage. Unknown competitor behaviour is not a gap.",
+      "evidence": [],
+      "started_at": null,
+      "completed_at": null,
+      "blocked_reason": null,
+      "next_action": "Complete module rule tracing; use current official/vendor evidence and document unavailable competitor trials.",
+      "plan_file": "plan/architecture-genesis-advantage-1.md"
+    }
+  ],
+  "roadmap_plan": "plan/feature-trade-suite-expansion-1.md",
+  "immediate_task_sequence": [
+    "TASK-039",
+    "TASK-040",
+    "TASK-041",
+    "TASK-042"
+  ],
+  "feature_selection_plan": "plan/architecture-genesis-advantage-1.md",
+  "feature_selection_policy": "Prioritise source-backed counter credit, cash-office reconciliation and complex receivables hypotheses. TASK-071 selects feature packages based on source, platform and competitive evidence; catalogue breadth alone does not justify implementation.",
+  "independent_source_tasks": [
+    "TASK-64",
+    "TASK-65",
+    "TASK-66",
+    "TASK-67",
+    "TASK-68",
+    "TASK-69",
+    "TASK-70"
+  ]
+}

@@ -1,0 +1,269 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [ 6 0 R ] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [ 0 0 595.28 841.89 ] /Contents 7 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> >>
+endobj
+7 0 obj
+<< /Length 3801 >>
+stream
+0.07 0.24 0.20 rg
+40 770 515 45 re f
+1 1 1 rg
+BT
+/F2 16 Tf
+55 790 Td
+(Genesis Retailers \(Pty\) Ltd) Tj
+ET
+BT
+/F2 14 Tf
+420 790 Td
+(STATEMENT) Tj
+ET
+0.2 0.2 0.2 rg
+BT
+/F1 8 Tf
+40 750 Td
+(124 Main Road, Paarl, Western Cape, 7646, South Africa) Tj
+0 -11 Td
+(Email: accounts@genesisretail.co.za  Tel: +27 21 872 1000) Tj
+ET
+BT
+/F1 8 Tf
+380 750 Td
+(Statement Date: 2026-08-31  Gen: #1) Tj
+0 -11 Td
+(Period: 2026-08-01 to 2026-08-31) Tj
+ET
+0.95 0.96 0.98 rg
+40 680 515 45 re f
+0.8 0.83 0.88 RG 1 w
+40 680 515 45 re S
+0 0 0 rg
+BT
+/F2 9 Tf
+50 708 Td
+(Account: DEBT-DELIVERY-01 - Premier Building Supplies) Tj
+/F1 8 Tf
+0 -12 Td
+(Billing Email: billing@debt-delivery-01.example.com  Phone: +27 21 000 0000) Tj
+0 -11 Td
+(Address: On File  Currency: ZAR) Tj
+ET
+0.93 0.94 0.96 rg
+40 645 515 18 re f
+0.7 0.7 0.7 RG 0.5 w
+40 645 515 18 re S
+0 0 0 rg
+BT
+/F2 7.5 Tf
+45 650 Td (Date) Tj
+60 0 Td (Document #) Tj
+100 0 Td (Type) Tj
+80 0 Td (Due Date) Tj
+80 0 Td (Debits (+)) Tj
+80 0 Td (Credits (-)) Tj
+60 0 Td (Balance) Tj
+ET
+0 0 0 rg
+BT
+/F2 8 Tf
+45 634 Td (2026-08-01) Tj
+60 0 Td (Balance Brought Forward) Tj
+340 0 Td (ZAR 0.0000) Tj
+ET
+0.2 0.2 0.2 rg
+BT
+/F1 7.5 Tf
+45 620 Td (2026-08-10) Tj
+60 0 Td (INV-AUG-001) Tj
+100 0 Td (invoice) Tj
+80 0 Td (2026-09-09) Tj
+80 0 Td (ZAR 12500.0000) Tj
+80 0 Td (—) Tj
+60 0 Td (ZAR 12500.0000) Tj
+ET
+0.9 0.9 0.9 RG 0.5 w
+40 618 m 555 618 l S
+0.92 0.95 0.94 rg
+40 275 515 24 re f
+0.3 0.5 0.4 RG 1 w
+40 275 515 24 re S
+0 0 0 rg
+BT
+/F2 8.5 Tf
+50 283 Td (Period Summary:) Tj
+/F1 8 Tf
+100 0 Td (Opening: 0.0000) Tj
+95 0 Td (Debits: +12500.0000) Tj
+95 0 Td (Credits: -0.0000) Tj
+/F2 8.5 Tf
+105 0 Td (Closing: ZAR 12500.0000) Tj
+ET
+0.96 0.96 0.96 rg
+40 205 515 55 re f
+0.75 0.75 0.75 RG 0.5 w
+40 205 515 55 re S
+0 0 0 rg
+BT
+/F2 7.5 Tf
+48 247 Td (Aging Analysis (Due-Date Basis as of 2026-08-31):) Tj
+ET
+BT
+/F2 6.5 Tf
+44 231 Td (Current) Tj
+ET
+BT
+/F1 6.5 Tf
+44 217 Td (12500.0000) Tj
+ET
+BT
+/F2 6.5 Tf
+108.375 231 Td (1-30 Days) Tj
+ET
+BT
+/F1 6.5 Tf
+108.375 217 Td (0.0000) Tj
+ET
+0.85 0.85 0.85 RG 0.5 w
+104.375 205 m 104.375 243 l S
+BT
+/F2 6.5 Tf
+172.75 231 Td (31-60 Days) Tj
+ET
+BT
+/F1 6.5 Tf
+172.75 217 Td (0.0000) Tj
+ET
+0.85 0.85 0.85 RG 0.5 w
+168.75 205 m 168.75 243 l S
+BT
+/F2 6.5 Tf
+237.125 231 Td (61-90 Days) Tj
+ET
+BT
+/F1 6.5 Tf
+237.125 217 Td (0.0000) Tj
+ET
+0.85 0.85 0.85 RG 0.5 w
+233.125 205 m 233.125 243 l S
+BT
+/F2 6.5 Tf
+301.5 231 Td (91-120 Days) Tj
+ET
+BT
+/F1 6.5 Tf
+301.5 217 Td (0.0000) Tj
+ET
+0.85 0.85 0.85 RG 0.5 w
+297.5 205 m 297.5 243 l S
+BT
+/F2 6.5 Tf
+365.875 231 Td (121-150 Days) Tj
+ET
+BT
+/F1 6.5 Tf
+365.875 217 Td (0.0000) Tj
+ET
+0.85 0.85 0.85 RG 0.5 w
+361.875 205 m 361.875 243 l S
+BT
+/F2 6.5 Tf
+430.25 231 Td (151-180 Days) Tj
+ET
+BT
+/F1 6.5 Tf
+430.25 217 Td (0.0000) Tj
+ET
+0.85 0.85 0.85 RG 0.5 w
+426.25 205 m 426.25 243 l S
+BT
+/F2 6.5 Tf
+494.625 231 Td (180+ Days) Tj
+ET
+BT
+/F1 6.5 Tf
+494.625 217 Td (0.0000) Tj
+ET
+0.85 0.85 0.85 RG 0.5 w
+490.625 205 m 490.625 243 l S
+0.6 0.6 0.6 RG [3 3] 0 d 0.75 w
+40 190 m 555 190 l S
+[] 0 d
+0.4 0.4 0.4 rg
+BT
+/F1 6.5 Tf
+220 193 Td (--- PLEASE DETACH AND RETURN WITH PAYMENT ---) Tj
+ET
+0.98 0.98 0.98 rg
+40 55 515 125 re f
+0.7 0.7 0.7 RG 0.5 w
+40 55 515 125 re S
+0 0 0 rg
+BT
+/F2 9.5 Tf
+50 163 Td (REMITTANCE ADVICE) Tj
+/F1 7.5 Tf
+0 -13 Td
+(Please make payments to: Genesis Retailers \(Pty\) Ltd) Tj
+0 -11 Td
+(Bank: First National Bank  Acc: 62891024810) Tj
+0 -11 Td
+(Branch Code: 250655  Ref: DEBT-DELIVERY-01) Tj
+ET
+0 0 0 rg
+BT
+/F1 7.5 Tf
+375 150 Td (Customer Account: DEBT-DELIVERY-01) Tj
+0 -14 Td
+(Statement Date: 2026-08-31) Tj
+0 -14 Td
+/F2 8.5 Tf
+(Total Due: ZAR 12500.0000) Tj
+/F1 7.5 Tf
+0 -14 Td
+(Amount Enclosed: [                  ]) Tj
+ET
+0.5 0.5 0.5 rg
+BT
+/F3 6.5 Tf
+40 35 Td
+(Immutable Statement Snapshot - ID: 4c08f473-3e6f-4e42-9f28-510807471798) Tj
+ET
+0.5 0.5 0.5 rg
+BT
+/F1 7 Tf
+490 20 Td
+(Page 1 of 1) Tj
+ET
+endstream
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000019 00000 n 
+0000000068 00000 n 
+0000000127 00000 n 
+0000000224 00000 n 
+0000000326 00000 n 
+0000000421 00000 n 
+0000000575 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+4428
+%%EOF

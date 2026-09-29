@@ -1,0 +1,1035 @@
+openapi: 3.1.0
+info:
+  title: Genesis Trade Suite API
+  version: 1.0.0
+  description: >
+    Production REST API for Genesis Trade Suite, providing Shopify-native
+    trade accounts, real-time credit controls, double-entry AR ledger receipts,
+    multi-document payment allocations, and eight-bucket aging analysis.
+servers:
+  - url: https://api.genesistradesuite.com/v1
+    description: Production API
+  - url: http://127.0.0.1:3001/v1
+    description: Local development API
+
+security:
+  - ShopifySessionToken: []
+
+paths:
+  /accounts:
+    get:
+      summary: List debtor accounts
+      description: Returns a cursor-paginated list of debtor accounts for the authenticated tenant.
+      operationId: listAccounts
+      tags:
+        - Accounts
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of items to return (1-100, default 50).
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          description: Account number cursor for forward pagination.
+          required: false
+          schema:
+            type: string
+        - name: search
+          in: query
+          description: Search term matching account number or legal name.
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter accounts by status.
+          required: false
+          schema:
+            type: string
+            enum: [active, hold, stopped, closed]
+      responses:
+        '200':
+          description: List of debtor accounts with pagination cursor.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, nextCursor, hasMore]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DebtorAccount'
+                  nextCursor:
+                    type: string
+                    nullable: true
+                  hasMore:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      summary: Create debtor account
+      description: Creates a new trade credit account with payment terms and credit limit. Requires bookkeeper role or higher.
+      operationId: createAccount
+      tags:
+        - Accounts
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Account created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [account]
+                properties:
+                  account:
+                    $ref: '#/components/schemas/DebtorAccount'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /accounts/{id}:
+    get:
+      summary: Get debtor account details
+      description: Returns account metadata, live open-item balance, credit exposure, and 8-bucket aging snapshot.
+      operationId: getAccount
+      tags:
+        - Accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the debtor account.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detailed account view.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [account, balance, credit, aging]
+                properties:
+                  account:
+                    $ref: '#/components/schemas/DebtorAccount'
+                  balance:
+                    $ref: '#/components/schemas/BalanceSummary'
+                  credit:
+                    $ref: '#/components/schemas/CreditExposure'
+                  aging:
+                    type: object
+                    required: [snapshot, isFresh]
+                    properties:
+                      snapshot:
+                        $ref: '#/components/schemas/AgingSnapshot'
+                        nullable: true
+                      isFresh:
+                        type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /accounts/{id}/policy:
+    patch:
+      summary: Update debtor account policy
+      description: Modifies credit limit, account status, hold reason, or terms. Requires manager or owner role.
+      operationId: updateAccountPolicy
+      tags:
+        - Accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the debtor account.
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePolicyRequest'
+      responses:
+        '200':
+          description: Policy updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [account]
+                properties:
+                  account:
+                    $ref: '#/components/schemas/DebtorAccount'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /accounts/{id}/credit-reservations:
+    post:
+      summary: Create credit reservation
+      description: Evaluates and locks credit for an in-flight POS or checkout cart.
+      operationId: createCreditReservation
+      tags:
+        - Credit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the debtor account.
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditReservationRequest'
+      responses:
+        '201':
+          description: Credit reservation created and approved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditReservationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          description: Credit limit exceeded, account on hold, or supervisor override required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /credit-reservations/{id}/override:
+    post:
+      summary: Record supervisor override
+      description: Approves a reservation that exceeded credit limit. Restricted to manager or owner role.
+      operationId: overrideCreditReservation
+      tags:
+        - Credit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the credit reservation.
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupervisorOverrideRequest'
+      responses:
+        '200':
+          description: Override recorded and reservation marked approved.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [overrideId, creditReservationId, approved, approvedAmount]
+                properties:
+                  overrideId:
+                    type: string
+                    format: uuid
+                  creditReservationId:
+                    type: string
+                    format: uuid
+                  approved:
+                    type: boolean
+                  approvedAmount:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /credit-reservations/{id}/confirm:
+    post:
+      summary: Confirm reservation submission
+      description: Transitions credit reservation to 'submitting' state before invoking Shopify order creation.
+      operationId: confirmCreditReservation
+      tags:
+        - Credit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the credit reservation.
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cartDigest:
+                  type: string
+                  description: SHA-256 cart digest verifying cart has not changed.
+      responses:
+        '200':
+          description: Reservation submission confirmed.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reservationId, status, operationId]
+                properties:
+                  reservationId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [submitting]
+                  operationId:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /payments:
+    post:
+      summary: Record payment or receipt
+      description: Posts double-entry journal (DR Bank/Cash, CR Accounts Receivable) with visible payment mode.
+      operationId: recordPayment
+      tags:
+        - Payments
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment posted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /receipts:
+    post:
+      summary: Alias for POST /payments
+      description: Record an evidence-backed receipt or manual payment.
+      operationId: recordReceipt
+      tags:
+        - Payments
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Receipt posted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /allocations:
+    post:
+      summary: Create document allocation
+      description: Allocates open credit documents against open debit invoices using explicit or oldest-first mode.
+      operationId: createAllocation
+      tags:
+        - Allocations
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AllocationRequest'
+      responses:
+        '201':
+          description: Allocation executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllocationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /allocations/{id}/reverse:
+    post:
+      summary: Reverse document allocation
+      description: Appends an immutable allocation reversal, restoring document balances without mutating history.
+      operationId: reverseAllocation
+      tags:
+        - Allocations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the allocation to reverse.
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReverseAllocationRequest'
+      responses:
+        '200':
+          description: Allocation reversed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReverseAllocationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+components:
+  securitySchemes:
+    ShopifySessionToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Signed Shopify App Bridge session token HMAC-SHA256 verified.
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique idempotency key preventing duplicate command execution.
+      schema:
+        type: string
+
+  schemas:
+    DebtorAccount:
+      type: object
+      required:
+        - id
+        - account_number
+        - legal_name
+        - currency
+        - credit_limit
+        - status
+        - aging_basis
+        - policy_version
+        - ledger_version
+      properties:
+        id:
+          type: string
+          format: uuid
+        account_number:
+          type: string
+        legal_name:
+          type: string
+        trade_name:
+          type: string
+          nullable: true
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        credit_limit:
+          type: string
+        status:
+          type: string
+          enum: [active, hold, stopped, closed]
+        hold_reason:
+          type: string
+          nullable: true
+        require_po:
+          type: boolean
+        require_job_reference:
+          type: boolean
+        aging_basis:
+          type: string
+          enum: [due_date, calendar_period]
+        policy_version:
+          type: integer
+        ledger_version:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    BalanceSummary:
+      type: object
+      required:
+        - totalDebit
+        - totalCredit
+        - totalOpenDebit
+        - unappliedCredit
+        - netBalance
+      properties:
+        totalDebit:
+          type: string
+        totalCredit:
+          type: string
+        totalOpenDebit:
+          type: string
+        unappliedCredit:
+          type: string
+        netBalance:
+          type: string
+
+    CreditExposure:
+      type: object
+      required:
+        - creditLimit
+        - postedNetBalance
+        - pendingReservations
+        - totalExposure
+        - availableCredit
+      properties:
+        creditLimit:
+          type: string
+        postedNetBalance:
+          type: string
+        pendingReservations:
+          type: string
+        totalExposure:
+          type: string
+        availableCredit:
+          type: string
+
+    AgingSnapshot:
+      type: object
+      required:
+        - snapshotId
+        - debtorAccountId
+        - asOfDate
+        - ledgerVersion
+        - basis
+        - buckets
+      properties:
+        snapshotId:
+          type: string
+          format: uuid
+        debtorAccountId:
+          type: string
+          format: uuid
+        asOfDate:
+          type: string
+          format: date
+        ledgerVersion:
+          type: integer
+        basis:
+          type: string
+          enum: [due_date, calendar_period]
+        buckets:
+          type: object
+          required: [current, d030, d060, d090, d120, d150, d180, over]
+          properties:
+            current: { type: string }
+            d030: { type: string }
+            d060: { type: string }
+            d090: { type: string }
+            d120: { type: string }
+            d150: { type: string }
+            d180: { type: string }
+            over: { type: string }
+
+    CreateAccountRequest:
+      type: object
+      required:
+        - accountNumber
+        - legalName
+        - currency
+        - paymentTermId
+        - creditLimit
+      properties:
+        accountNumber:
+          type: string
+        legalName:
+          type: string
+        tradeName:
+          type: string
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        paymentTermId:
+          type: string
+          format: uuid
+        creditLimit:
+          type: string
+        status:
+          type: string
+          enum: [active, hold, stopped, closed]
+          default: active
+        agingBasis:
+          type: string
+          enum: [due_date, calendar_period]
+          default: due_date
+        requirePo:
+          type: boolean
+          default: false
+        requireJobReference:
+          type: boolean
+          default: false
+
+    UpdatePolicyRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          description: Mandatory business rationale for audit logging.
+        expectedPolicyVersion:
+          type: integer
+          description: Concurrency precondition (optimistic lock).
+        creditLimit:
+          type: string
+        status:
+          type: string
+          enum: [active, hold, stopped, closed]
+        holdReason:
+          type: string
+          nullable: true
+        agingBasis:
+          type: string
+          enum: [due_date, calendar_period]
+        requirePo:
+          type: boolean
+        requireJobReference:
+          type: boolean
+
+    CreateCreditReservationRequest:
+      type: object
+      required:
+        - amount
+        - currency
+        - cartDigest
+        - locationId
+      properties:
+        amount:
+          type: string
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        cartDigest:
+          type: string
+          description: 64-character SHA-256 hash of line items.
+        locationId:
+          type: string
+          format: uuid
+        confirmedDeposit:
+          type: string
+          default: '0.0000'
+        ttlSeconds:
+          type: integer
+          default: 120
+
+    CreditReservationResponse:
+      type: object
+      required:
+        - reservationId
+        - status
+        - amount
+        - currency
+        - expiresAt
+        - isDuplicate
+      properties:
+        reservationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [reserved, submitting, consumed, cancelled, expired, uncertain]
+        amount:
+          type: string
+        currency:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        isDuplicate:
+          type: boolean
+
+    SupervisorOverrideRequest:
+      type: object
+      required:
+        - reason
+        - approvedAmount
+        - cartDigest
+      properties:
+        reason:
+          type: string
+        approvedAmount:
+          type: string
+        cartDigest:
+          type: string
+
+    PaymentRequest:
+      type: object
+      required:
+        - debtorAccountId
+        - amount
+        - currency
+        - paymentMethod
+        - effectiveDate
+        - reference
+        - paymentMode
+      properties:
+        debtorAccountId:
+          type: string
+          format: uuid
+        amount:
+          type: string
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        paymentMethod:
+          type: string
+          enum: [bank_transfer, cash, card, shopify_manual_payment, check]
+        effectiveDate:
+          type: string
+          format: date
+        reference:
+          type: string
+        paymentMode:
+          type: string
+          enum: [external_receipt, shopify_manual, shopify_pos_cash]
+          description: Visible payment synchronization mode.
+        memo:
+          type: string
+        autoAllocate:
+          type: boolean
+          default: false
+
+    PaymentResponse:
+      type: object
+      required:
+        - journalId
+        - documentId
+        - paymentMode
+        - paymentMethod
+        - amount
+        - currency
+        - effectiveDate
+        - reference
+        - isDuplicate
+        - unappliedCredit
+        - netBalance
+      properties:
+        journalId:
+          type: string
+          format: uuid
+        documentId:
+          type: string
+          format: uuid
+        paymentMode:
+          type: string
+          enum: [external_receipt, shopify_manual, shopify_pos_cash]
+        paymentMethod:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        effectiveDate:
+          type: string
+          format: date
+        reference:
+          type: string
+        isDuplicate:
+          type: boolean
+        unappliedCredit:
+          type: string
+        netBalance:
+          type: string
+        allocations:
+          type: array
+          items:
+            type: object
+            properties:
+              allocationId: { type: string, format: uuid }
+              debitDocumentId: { type: string, format: uuid }
+              amount: { type: string }
+
+    AllocationRequest:
+      type: object
+      required:
+        - debtorAccountId
+        - mode
+        - effectiveDate
+      properties:
+        debtorAccountId:
+          type: string
+          format: uuid
+        mode:
+          type: string
+          enum: [explicit, oldest_first]
+        effectiveDate:
+          type: string
+          format: date
+        debitDocumentId:
+          type: string
+          format: uuid
+          description: Required when mode is 'explicit'.
+        creditDocumentId:
+          type: string
+          format: uuid
+          description: Required for both modes.
+        amount:
+          type: string
+          description: Required when mode is 'explicit'.
+
+    AllocationResponse:
+      type: object
+      required:
+        - mode
+        - debtorAccountId
+        - unappliedCredit
+        - netBalance
+      properties:
+        mode:
+          type: string
+          enum: [explicit, oldest_first]
+        allocationId:
+          type: string
+          format: uuid
+        debtorAccountId:
+          type: string
+          format: uuid
+        debitDocumentId:
+          type: string
+          format: uuid
+        creditDocumentId:
+          type: string
+          format: uuid
+        amount:
+          type: string
+        totalAllocated:
+          type: string
+        unappliedCredit:
+          type: string
+        netBalance:
+          type: string
+        isDuplicate:
+          type: boolean
+        allocations:
+          type: array
+          items:
+            type: object
+            properties:
+              allocationId: { type: string, format: uuid }
+              debitDocumentId: { type: string, format: uuid }
+              amount: { type: string }
+
+    ReverseAllocationRequest:
+      type: object
+      required:
+        - reason
+        - effectiveDate
+      properties:
+        reason:
+          type: string
+        effectiveDate:
+          type: string
+          format: date
+
+    ReverseAllocationResponse:
+      type: object
+      required:
+        - reversalId
+        - allocationId
+        - restoredAmount
+        - effectiveDate
+        - reason
+        - unappliedCredit
+        - netBalance
+      properties:
+        reversalId:
+          type: string
+          format: uuid
+        allocationId:
+          type: string
+          format: uuid
+        restoredAmount:
+          type: string
+        effectiveDate:
+          type: string
+          format: date
+        reason:
+          type: string
+        unappliedCredit:
+          type: string
+        netBalance:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - code
+        - message
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Missing required fields or malformed request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Authentication failed or missing valid session token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Authenticated actor lacks required permission.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Requested resource was not found for this tenant.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Conflict:
+      description: Concurrency version conflict, duplicate identifier, or idempotency conflict with differing payload.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Business policy rejection, credit declined, or currency mismatch.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

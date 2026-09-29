@@ -1,0 +1,1052 @@
+{
+  "version": 1,
+  "synthetic": true,
+  "review_status": "Pending finance review",
+  "note": "AGE/PER are source-derived arithmetic; DUE/CASH/REV are proposed new-product contracts. No production Genesis data is included.",
+  "cases": [
+    {
+      "id": "AGE-001",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "0.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "0.00"
+      }
+    },
+    {
+      "id": "AGE-002",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "10.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "0.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "10.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "10.00"
+      }
+    },
+    {
+      "id": "AGE-003",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "10.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "5.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "5.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "5.00"
+      }
+    },
+    {
+      "id": "AGE-004",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "10.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "10.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "0.00"
+      }
+    },
+    {
+      "id": "AGE-005",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "10.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "40.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "-30.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "30.00",
+        "netBalance": "-30.00"
+      }
+    },
+    {
+      "id": "AGE-006",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "20.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "50.00",
+          "over": "100.00"
+        },
+        "credit": "120.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "20.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "30.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "50.00"
+      }
+    },
+    {
+      "id": "AGE-007",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "20.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "50.00",
+          "over": "100.00"
+        },
+        "credit": "200.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "-30.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "30.00",
+        "netBalance": "-30.00"
+      }
+    },
+    {
+      "id": "AGE-008",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "20.00",
+          "d030": "30.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "35.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "15.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "15.00"
+      }
+    },
+    {
+      "id": "AGE-009",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "10.00",
+          "d090": "20.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "5.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "10.00",
+          "d090": "15.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "25.00"
+      }
+    },
+    {
+      "id": "AGE-010",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "5.00",
+          "over": "0.00"
+        },
+        "credit": "7.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "-2.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "2.00",
+        "netBalance": "-2.00"
+      }
+    },
+    {
+      "id": "AGE-011",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "1.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "-1.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "1.00",
+        "netBalance": "-1.00"
+      }
+    },
+    {
+      "id": "AGE-012",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "1.00",
+          "d030": "1.00",
+          "d060": "1.00",
+          "d090": "1.00",
+          "d120": "1.00",
+          "d150": "1.00",
+          "d180": "1.00",
+          "over": "1.00"
+        },
+        "credit": "3.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "1.00",
+          "d030": "1.00",
+          "d060": "1.00",
+          "d090": "1.00",
+          "d120": "1.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "5.00"
+      }
+    },
+    {
+      "id": "AGE-013",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "100.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "10.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "90.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "90.00"
+      }
+    },
+    {
+      "id": "AGE-014",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "10.00",
+          "d150": "10.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "15.00"
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "5.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "5.00"
+      }
+    },
+    {
+      "id": "AGE-015",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "1.00",
+          "over": "1.00"
+        },
+        "credit": "1.50"
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.50",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "0.50"
+      }
+    },
+    {
+      "id": "AGE-016",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "1.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "0.01"
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.99",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.00",
+        "netBalance": "0.99"
+      }
+    },
+    {
+      "id": "AGE-017",
+      "kind": "legacy_oldest_first",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:286-402",
+      "input": {
+        "debits": {
+          "current": "0.01",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "credit": "0.02"
+      },
+      "expected": {
+        "buckets": {
+          "current": "-0.01",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        },
+        "unappliedCredit": "0.01",
+        "netBalance": "-0.01"
+      }
+    },
+    {
+      "id": "PER-001",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 12,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "100.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        }
+      }
+    },
+    {
+      "id": "PER-002",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 11,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "100.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        }
+      }
+    },
+    {
+      "id": "PER-003",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 10,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "100.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        }
+      }
+    },
+    {
+      "id": "PER-004",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 9,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "100.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        }
+      }
+    },
+    {
+      "id": "PER-005",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 8,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "100.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "0.00"
+        }
+      }
+    },
+    {
+      "id": "PER-006",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 7,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "100.00",
+          "d180": "0.00",
+          "over": "0.00"
+        }
+      }
+    },
+    {
+      "id": "PER-007",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 6,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "100.00",
+          "over": "0.00"
+        }
+      }
+    },
+    {
+      "id": "PER-008",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 5,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "100.00"
+        }
+      }
+    },
+    {
+      "id": "PER-009",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 1,
+            "amount": "100.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "0.00",
+          "d030": "0.00",
+          "d060": "0.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "0.00",
+          "over": "100.00"
+        }
+      }
+    },
+    {
+      "id": "PER-010",
+      "kind": "accounting_period",
+      "source": "System/DEB/SysDEBBalance_ReCalc.pas:225-314",
+      "input": {
+        "asOfOrdinal": 12,
+        "debits": [
+          {
+            "ordinal": 12,
+            "amount": "7.00"
+          },
+          {
+            "ordinal": 10,
+            "amount": "11.00"
+          },
+          {
+            "ordinal": 6,
+            "amount": "13.00"
+          },
+          {
+            "ordinal": 5,
+            "amount": "17.00"
+          },
+          {
+            "ordinal": 1,
+            "amount": "19.00"
+          }
+        ]
+      },
+      "expected": {
+        "buckets": {
+          "current": "7.00",
+          "d030": "0.00",
+          "d060": "11.00",
+          "d090": "0.00",
+          "d120": "0.00",
+          "d150": "0.00",
+          "d180": "13.00",
+          "over": "36.00"
+        }
+      }
+    },
+    {
+      "id": "DUE-001",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-02-28",
+        "asOfDate": "2026-02-01"
+      },
+      "expected": {
+        "bucket": "current"
+      }
+    },
+    {
+      "id": "DUE-002",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-02-28",
+        "asOfDate": "2026-02-28"
+      },
+      "expected": {
+        "bucket": "current"
+      }
+    },
+    {
+      "id": "DUE-003",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-02-28",
+        "asOfDate": "2026-03-01"
+      },
+      "expected": {
+        "bucket": "d030"
+      }
+    },
+    {
+      "id": "DUE-004",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-01-01",
+        "asOfDate": "2026-01-31"
+      },
+      "expected": {
+        "bucket": "d030"
+      }
+    },
+    {
+      "id": "DUE-005",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-01-01",
+        "asOfDate": "2026-02-01"
+      },
+      "expected": {
+        "bucket": "d060"
+      }
+    },
+    {
+      "id": "DUE-006",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-01-01",
+        "asOfDate": "2026-03-02"
+      },
+      "expected": {
+        "bucket": "d060"
+      }
+    },
+    {
+      "id": "DUE-007",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-01-01",
+        "asOfDate": "2026-03-03"
+      },
+      "expected": {
+        "bucket": "d090"
+      }
+    },
+    {
+      "id": "DUE-008",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-01-01",
+        "asOfDate": "2026-06-30"
+      },
+      "expected": {
+        "bucket": "d180"
+      }
+    },
+    {
+      "id": "DUE-009",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2026-01-01",
+        "asOfDate": "2026-07-01"
+      },
+      "expected": {
+        "bucket": "over"
+      }
+    },
+    {
+      "id": "DUE-010",
+      "kind": "due_date_policy",
+      "source": "New-product due-date policy; docs/02-genesis-rule-extraction.md",
+      "input": {
+        "dueDate": "2024-02-29",
+        "asOfDate": "2024-03-01"
+      },
+      "expected": {
+        "bucket": "d030"
+      }
+    },
+    {
+      "id": "CASH-001",
+      "kind": "cash_expected_policy",
+      "source": "New-product cash formula; docs/03-architecture.md",
+      "input": {
+        "openingFloat": "100.00",
+        "cashSales": "200.00",
+        "cashReceipts": "0.00",
+        "paidIn": "0.00",
+        "cashRefunds": "30.00",
+        "paidOut": "0.00",
+        "cashDrops": "150.00"
+      },
+      "expected": {
+        "amount": "120.00"
+      }
+    },
+    {
+      "id": "CASH-002",
+      "kind": "cash_expected_policy",
+      "source": "New-product cash formula; docs/03-architecture.md",
+      "input": {
+        "openingFloat": "50.00",
+        "cashSales": "0.00",
+        "cashReceipts": "25.00",
+        "paidIn": "5.00",
+        "cashRefunds": "0.00",
+        "paidOut": "10.00",
+        "cashDrops": "0.00"
+      },
+      "expected": {
+        "amount": "70.00"
+      }
+    },
+    {
+      "id": "CASH-003",
+      "kind": "cash_expected_policy",
+      "source": "New-product cash formula; docs/03-architecture.md",
+      "input": {
+        "openingFloat": "10.00",
+        "cashSales": "0.00",
+        "cashReceipts": "0.00",
+        "paidIn": "0.00",
+        "cashRefunds": "15.00",
+        "paidOut": "0.00",
+        "cashDrops": "0.00"
+      },
+      "expected": {
+        "amount": "-5.00"
+      }
+    },
+    {
+      "id": "CASH-004",
+      "kind": "cash_expected_policy",
+      "source": "New-product cash formula; docs/03-architecture.md",
+      "input": {
+        "openingFloat": "0.00",
+        "cashSales": "100.00",
+        "cashReceipts": "0.00",
+        "paidIn": "0.00",
+        "cashRefunds": "0.00",
+        "paidOut": "0.00",
+        "cashDrops": "100.00"
+      },
+      "expected": {
+        "amount": "0.00"
+      }
+    },
+    {
+      "id": "REV-001",
+      "kind": "signed_reversal_policy",
+      "source": "New-product immutable reversal; docs/03-architecture.md",
+      "input": {
+        "originalBalance": "100.00",
+        "reversalAmount": "100.00"
+      },
+      "expected": {
+        "balance": "0.00"
+      }
+    },
+    {
+      "id": "REV-002",
+      "kind": "signed_reversal_policy",
+      "source": "New-product immutable reversal; docs/03-architecture.md",
+      "input": {
+        "originalBalance": "-25.00",
+        "reversalAmount": "-25.00"
+      },
+      "expected": {
+        "balance": "0.00"
+      }
+    },
+    {
+      "id": "REV-003",
+      "kind": "signed_reversal_policy",
+      "source": "New-product immutable reversal; docs/03-architecture.md",
+      "input": {
+        "originalBalance": "100.00",
+        "reversalAmount": "40.00"
+      },
+      "expected": {
+        "balance": "60.00"
+      }
+    }
+  ]
+}

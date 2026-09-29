@@ -1,0 +1,21 @@
+{
+  "name": "@genesis-shopify/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.ts",
+    "start": "node src/server.ts",
+    "test": "node --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "fastify": "5.12.5",
+    "pg": "^8.23.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  }
+}

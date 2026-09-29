@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Statement of Account — DEBT-001</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 15mm 15mm 20mm 15mm;
+      @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 8pt;
+        color: #718096;
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1a202c;
+      margin: 0;
+      padding: 0;
+      font-size: 9.5pt;
+      line-height: 1.4;
+      background: #ffffff;
+    }
+    .header-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .header-table td {
+      vertical-align: top;
+    }
+    .merchant-brand {
+      font-size: 16pt;
+      font-weight: 700;
+      color: #123d32;
+      margin: 0 0 4px;
+    }
+    .merchant-meta {
+      color: #4a5568;
+      font-size: 8.5pt;
+      line-height: 1.35;
+    }
+    .statement-title-box {
+      text-align: right;
+    }
+    .statement-title {
+      font-size: 18pt;
+      font-weight: 800;
+      color: #123d32;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 6px;
+    }
+    .meta-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #edf2f7;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      font-size: 8.5pt;
+      font-weight: 600;
+      color: #2d3748;
+    }
+    .parties-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    .parties-table td {
+      width: 50%;
+      vertical-align: top;
+      padding: 10px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: #f8fafc;
+    }
+    .section-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #718096;
+      margin-bottom: 4px;
+    }
+    .party-name {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 4px;
+    }
+    .party-info {
+      font-size: 8.5pt;
+      color: #4a5568;
+      line-height: 1.35;
+    }
+    .totals-summary {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 6px;
+    }
+    .totals-summary td {
+      padding: 10px 14px;
+      text-align: center;
+      border-right: 1px solid #bbf7d0;
+    }
+    .totals-summary td:last-child {
+      border-right: none;
+      background: #dcfce7;
+    }
+    .totals-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #166534;
+      margin-bottom: 3px;
+    }
+    .totals-value {
+      font-size: 12pt;
+      font-weight: 800;
+      color: #14532d;
+      font-variant-numeric: tabular-nums;
+    }
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 18px;
+    }
+    .items-table th {
+      background: #123d32;
+      color: #ffffff;
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 7px 10px;
+      text-align: left;
+      border: 1px solid #123d32;
+    }
+    .items-table td {
+      padding: 7px 10px;
+      border: 1px solid #e2e8f0;
+      font-size: 8.5pt;
+      vertical-align: middle;
+    }
+    .items-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    .items-table .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .aging-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 22px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+    }
+    .aging-table th {
+      background: #edf2f7;
+      padding: 6px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #4a5568;
+      border-right: 1px solid #cbd5e0;
+      border-bottom: 1px solid #cbd5e0;
+      text-align: center;
+    }
+    .aging-table td {
+      padding: 8px 6px;
+      font-size: 8.5pt;
+      font-weight: 700;
+      text-align: center;
+      border-right: 1px solid #cbd5e0;
+      font-variant-numeric: tabular-nums;
+    }
+    .aging-table th:last-child,
+    .aging-table td:last-child {
+      border-right: none;
+    }
+    .aging-table .due-alert {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+    .remittance-slip {
+      border: 2px dashed #94a3b8;
+      border-radius: 6px;
+      padding: 14px;
+      background: #fdfdfd;
+      margin-top: 24px;
+      page-break-inside: avoid;
+    }
+    .remittance-title {
+      font-size: 10pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #123d32;
+      margin: 0 0 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .remittance-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 16px;
+    }
+    .bank-box {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 8.5pt;
+      line-height: 1.4;
+    }
+    .slip-fields {
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 8.5pt;
+    }
+    .slip-fields .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .sha-hash {
+      font-family: monospace;
+      font-size: 7pt;
+      color: #94a3b8;
+      text-align: right;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header: Merchant & Statement Meta -->
+  <table class="header-table">
+    <tr>
+      <td>
+        <div class="merchant-brand">Genesis Wholesale Ltd</div>
+        <div class="merchant-meta">
+          42 Industrial Way, Cape Town, 8001, South Africa<br>
+          VAT/Tax #: ZA4001122334 · 
+          Email: accounts@genesiswholesale.co.za · Tel: +27 21 555 1234
+        </div>
+      </td>
+      <td class="statement-title-box">
+        <div class="statement-title">Statement</div>
+        <div class="meta-badge">
+          Date: 2026-08-31 · Generation: #1
+        </div>
+        <div style="font-size: 8pt; color: #718096; margin-top: 4px;">
+          Period: 2026-08-01 to 2026-08-31
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Customer Box & Account Reference -->
+  <table class="parties-table">
+    <tr>
+      <td>
+        <div class="section-label">Account Holder</div>
+        <div class="party-name">Apex Engineering Works</div>
+        <div class="party-info">
+          Account #: <strong>DEBT-001</strong><br>
+          Email: accounts@apexeng.co.za<br>
+          Phone: +27 11 999 8888<br>
+          15 Factory Road, Epping, Cape Town, 7460
+        </div>
+      </td>
+      <td>
+        <div class="section-label">Statement Parameters</div>
+        <div class="party-info">
+          Statement ID: <code>stmt-0001-single-line</code><br>
+          Cutoff Recorded At: 2026-08-31T23:59:59.000Z<br>
+          Currency: <strong>ZAR</strong><br>
+          Ledger Revision: v1 · Policy: v1
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Control Totals Summary -->
+  <table class="totals-summary">
+    <tr>
+      <td>
+        <div class="totals-label">Opening Balance</div>
+        <div class="totals-value">ZAR 0.0000</div>
+      </td>
+      <td>
+        <div class="totals-label">Period Debits (+)</div>
+        <div class="totals-value">ZAR 1250.5000</div>
+      </td>
+      <td>
+        <div class="totals-label">Period Credits (-)</div>
+        <div class="totals-value">ZAR 0.0000</div>
+      </td>
+      <td>
+        <div class="totals-label">Closing Balance Due</div>
+        <div class="totals-value">ZAR 1250.5000</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Transactions Table -->
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th style="width: 12%;">Date</th>
+        <th style="width: 18%;">Document #</th>
+        <th style="width: 14%;">Type</th>
+        <th style="width: 14%;">Due Date</th>
+        <th class="num" style="width: 14%;">Debits</th>
+        <th class="num" style="width: 14%;">Credits</th>
+        <th class="num" style="width: 14%;">Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2026-08-01</td>
+        <td colspan="5"><strong>Balance Brought Forward</strong></td>
+        <td class="num"><strong>ZAR 0.0000</strong></td>
+      </tr>
+      
+      <tr>
+        <td>2026-08-15</td>
+        <td><strong>INV-00101</strong></td>
+        <td>invoice</td>
+        <td>2026-09-15</td>
+        <td class="num">ZAR 1250.5000</td>
+        <td class="num">—</td>
+        <td class="num">ZAR 1250.5000</td>
+      </tr>
+      <tr style="background: #f1f5f9; font-weight: 700;">
+        <td colspan="4" style="text-align: right; padding-right: 12px;">Period Totals & Closing Balance:</td>
+        <td class="num">ZAR 1250.5000</td>
+        <td class="num">ZAR 0.0000</td>
+        <td class="num" style="font-size: 9.5pt; color: #14532d;">ZAR 1250.5000</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 8-Bucket Aging Analysis -->
+  <div style="font-size: 8pt; font-weight: 700; text-transform: uppercase; color: #4a5568; margin-bottom: 4px;">
+    Aging Breakdown as of 2026-08-31 (Unapplied Credit: ZAR 0.0000)
+  </div>
+  <table class="aging-table">
+    <thead>
+      <tr>
+        <th>Current</th>
+        <th>1–30 Days</th>
+        <th>31–60 Days</th>
+        <th>61–90 Days</th>
+        <th>91–120 Days</th>
+        <th>121–150 Days</th>
+        <th>151–180 Days</th>
+        <th>180+ Days</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1250.5000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+        <td class="">0.0000</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Remittance Advice Slip -->
+  <div class="remittance-slip">
+    <div class="remittance-title">
+      <span>Remittance Advice</span>
+      <span style="font-size: 8pt; font-weight: normal; color: #64748b;">Please detach and return with payment</span>
+    </div>
+    <div class="remittance-grid">
+      <div class="bank-box">
+        <strong>Direct Banking / Settlement Instructions:</strong><br>
+        Bank: <strong>Standard Bank</strong><br>
+        Account Number: <strong>071234567</strong><br>
+        Branch Code: <strong>051001</strong> (Business Current)<br>
+        Required Payment Reference: <strong>DEBT-001</strong>
+      </div>
+      <div class="slip-fields">
+        <div class="row">
+          <span>Customer Account:</span>
+          <strong>DEBT-001</strong>
+        </div>
+        <div class="row">
+          <span>Statement Date:</span>
+          <span>2026-08-31</span>
+        </div>
+        <div class="row" style="margin-top: 8px; border-top: 1px solid #cbd5e1; padding-top: 6px;">
+          <span>Total Balance Due:</span>
+          <strong style="color: #14532d; font-size: 10pt;">ZAR 1250.5000</strong>
+        </div>
+        <div class="row" style="margin-top: 6px;">
+          <span>Amount Enclosed:</span>
+          <span style="border-bottom: 1px solid #64748b; width: 100px; display: inline-block;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sha-hash">
+    Verification SHA-256: b1c4c3c3c6d36755a1076bb3804172fb38973a5456cc44d967d2f5ed4110750f · Certified Immutable Snapshot
+  </div>
+</body>
+</html>

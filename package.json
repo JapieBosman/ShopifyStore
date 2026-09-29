@@ -1,0 +1,19 @@
+{
+  "name": "genesis-for-shopify",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "test": "pnpm --filter @genesis-shopify/domain test && pnpm --filter @genesis-shopify/database test && pnpm --filter @genesis-shopify/api test && pnpm --filter @genesis-shopify/worker test && pnpm --filter @genesis-shopify/rule-proof test && node --test tests/integration/*.test.ts && node --test tests/unit/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "pnpm typecheck && pnpm --filter @genesis-shopify/admin build && npm --prefix apps/shopify/genesis-trade-suite run build && pnpm exec shopify app build --path apps/shopify/genesis-trade-suite",
+    "shopify:dev": "pnpm exec shopify app dev --path apps/shopify/genesis-trade-suite --store displaydeck.myshopify.com",
+    "shopify:typecheck": "npm --prefix apps/shopify/genesis-trade-suite run typecheck"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@shopify/cli": "4.8.2",
+    "@types/node": "24.7.0",
+    "typescript": "5.9.3"
+  }
+}

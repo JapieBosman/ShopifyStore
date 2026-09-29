@@ -1,0 +1,14 @@
+{
+  "name": "@genesis-shopify/database",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.ts"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

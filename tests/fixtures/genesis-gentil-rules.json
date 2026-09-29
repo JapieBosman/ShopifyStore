@@ -1,0 +1,313 @@
+{
+  "version": 1,
+  "synthetic": true,
+  "module": "genTIL",
+  "source_root": "C:/Github/GENESIS",
+  "source_sha256": {
+    "genTIL/Forms/VTILL001.pas": "15A121DA40D1B92E6F4897371354AD4923AA80BE108AA2F068E90387EC981033",
+    "genTIL/Forms/VTILL002L.pas": "28F79C1CB61413022F93EF0313A62DF550D72CF225B56F5100B6B91BC87DEC55"
+  },
+  "review_status": "Pending Delphi execution, finance review and Shopify adaptation",
+  "note": "Legacy decision examples derived by source inspection. 'allow' means only that the isolated observed check passes; other validations may still deny a transaction.",
+  "cases": [
+    {
+      "id": "TIL-001",
+      "rule": "TIL-STATUS",
+      "source": "genTIL/Forms/VTILL001.pas:732-779",
+      "input": {
+        "status": "C",
+        "transactionType": "POSASL"
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "closed"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-002",
+      "rule": "TIL-STATUS",
+      "source": "genTIL/Forms/VTILL001.pas:732-779",
+      "input": {
+        "status": "X",
+        "transactionType": "POSASL"
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "archived"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-003",
+      "rule": "TIL-STATUS",
+      "source": "genTIL/Forms/VTILL001.pas:748-750",
+      "input": {
+        "status": "I",
+        "transactionType": "POSASL"
+      },
+      "expected": {
+        "decision": "allow_with_notice",
+        "reason": "inactive"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-004",
+      "rule": "TIL-STATUS",
+      "source": "genTIL/Forms/VTILL001.pas:752-775",
+      "input": {
+        "status": "H",
+        "transactionType": "POSASL",
+        "supervisorApproved": false
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "supervisor_required"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-005",
+      "rule": "TIL-STATUS",
+      "source": "genTIL/Forms/VTILL001.pas:752-775",
+      "input": {
+        "status": "H",
+        "transactionType": "DEBQOT",
+        "supervisorApproved": false
+      },
+      "expected": {
+        "decision": "allow",
+        "reason": "quote_exemption"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-006",
+      "rule": "TIL-STATUS",
+      "source": "genTIL/Forms/VTILL001.pas:766-775",
+      "input": {
+        "status": "T",
+        "transactionType": "POSASL",
+        "supervisorApproved": true
+      },
+      "expected": {
+        "decision": "allow",
+        "reason": "supervisor_approved"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-007",
+      "rule": "TIL-SALETYPE",
+      "source": "genTIL/Forms/VTILL001.pas:781-797",
+      "input": {
+        "saleType": "A",
+        "transactionType": "POSCSH"
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "account_sales_only"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-008",
+      "rule": "TIL-SALETYPE",
+      "source": "genTIL/Forms/VTILL001.pas:781-797",
+      "input": {
+        "saleType": "C",
+        "transactionType": "POSASL"
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "cash_sales_only"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-009",
+      "rule": "TIL-SALETYPE",
+      "source": "genTIL/Forms/VTILL001.pas:781-797",
+      "input": {
+        "saleType": "B",
+        "transactionType": "POSASL"
+      },
+      "expected": {
+        "decision": "allow"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-010",
+      "rule": "TIL-CREDIT",
+      "source": "genTIL/Forms/VTILL001.pas:972-988",
+      "input": {
+        "limitMode": "S",
+        "transactionType": "POSASL",
+        "openToBuy": "0.00",
+        "eligibleTransaction": true
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "limit_reached"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-011",
+      "rule": "TIL-CREDIT",
+      "source": "genTIL/Forms/VTILL001.pas:972-988",
+      "input": {
+        "limitMode": "W",
+        "transactionType": "POSASL",
+        "openToBuy": "-0.01",
+        "eligibleTransaction": true,
+        "warningAccepted": false
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "warning_declined"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-012",
+      "rule": "TIL-CREDIT",
+      "source": "genTIL/Forms/VTILL001.pas:972-988",
+      "input": {
+        "limitMode": "I",
+        "transactionType": "POSASL",
+        "openToBuy": "-0.01",
+        "eligibleTransaction": true
+      },
+      "expected": {
+        "decision": "allow",
+        "reason": "legacy_ignore_mode"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-013",
+      "rule": "TIL-OVERDUE",
+      "source": "genTIL/Forms/VTILL001.pas:990-1018",
+      "input": {
+        "overdue": "50.00",
+        "companyMode": "U",
+        "transactionType": "POSASL",
+        "supervisorApproved": false
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "overdue_supervisor_required"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-014",
+      "rule": "TIL-OVERDUE",
+      "source": "genTIL/Forms/VTILL001.pas:990-1018",
+      "input": {
+        "overdue": "50.00",
+        "companyMode": "S",
+        "transactionType": "DEBQOT",
+        "supervisorApproved": false
+      },
+      "expected": {
+        "decision": "allow",
+        "reason": "quote_exemption"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-015",
+      "rule": "TIL-PO",
+      "source": "genTIL/Forms/VTILL001.pas:1277-1290",
+      "input": {
+        "purchaseOrderRequired": true,
+        "transactionType": "POSASL",
+        "purchaseOrder": " "
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "po_required"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-016",
+      "rule": "TIL-PO",
+      "source": "genTIL/Forms/VTILL001.pas:1277-1290",
+      "input": {
+        "purchaseOrderRequired": true,
+        "transactionType": "POSART",
+        "purchaseOrder": ""
+      },
+      "expected": {
+        "decision": "allow",
+        "reason": "return_exemption"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-017",
+      "rule": "TIL-DEPOSIT",
+      "source": "genTIL/Forms/VTILL002L.pas:199-227",
+      "input": {
+        "reference": "DEP-1",
+        "amount": "0.00",
+        "documentTotal": "100.00"
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "positive_amount_required"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-018",
+      "rule": "TIL-DEPOSIT",
+      "source": "genTIL/Forms/VTILL002L.pas:199-227",
+      "input": {
+        "reference": "DEP-1",
+        "amount": "100.01",
+        "documentTotal": "100.00"
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "exceeds_document_total"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-019",
+      "rule": "TIL-DEPOSIT",
+      "source": "genTIL/Forms/VTILL002L.pas:199-227",
+      "input": {
+        "reference": " ",
+        "amount": "50.00",
+        "documentTotal": "100.00"
+      },
+      "expected": {
+        "decision": "deny",
+        "reason": "reference_required"
+      },
+      "review_status": "source_interpreted_not_executed"
+    },
+    {
+      "id": "TIL-020",
+      "rule": "TIL-DEPOSIT",
+      "source": "genTIL/Forms/VTILL002L.pas:199-227",
+      "input": {
+        "reference": "DEP-1",
+        "amount": "50.00",
+        "documentTotal": "100.00"
+      },
+      "expected": {
+        "decision": "allow",
+        "reason": "valid_deposit"
+      },
+      "review_status": "source_interpreted_not_executed"
+    }
+  ]
+}

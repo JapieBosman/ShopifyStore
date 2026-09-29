@@ -1,0 +1,11 @@
+{
+  "name": "@genesis-shopify/domain",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.ts"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
