@@ -51,6 +51,10 @@ export function parseIsoDate(dateStr: string): {
   const month = Number(match[2]);
   const day = Number(match[3]);
 
+  if (year < 1) {
+    throw new RangeError(`Invalid year in date '${dateStr}': must be 0001-9999`);
+  }
+
   if (month < 1 || month > 12) {
     throw new RangeError(`Invalid month in date '${dateStr}': must be 01-12`);
   }
@@ -62,7 +66,10 @@ export function parseIsoDate(dateStr: string): {
     );
   }
 
-  const utc = Date.UTC(year, month - 1, day);
+  const parsed = new Date(0);
+  parsed.setUTCFullYear(year, month - 1, day);
+  parsed.setUTCHours(0, 0, 0, 0);
+  const utc = parsed.getTime();
   return { year, month, day, utc };
 }
 
@@ -74,9 +81,15 @@ export function formatIsoDate(year: number, month: number, day: number): string 
 }
 
 export function addDays(dateStr: string, days: number): string {
+  if (!Number.isSafeInteger(days)) {
+    throw new RangeError("Day offset must be a safe integer");
+  }
   const { utc } = parseIsoDate(dateStr);
   const targetUtc = utc + days * MILLISECONDS_PER_DAY;
   const target = new Date(targetUtc);
+  if (!Number.isFinite(targetUtc) || target.getUTCFullYear() < 1 || target.getUTCFullYear() > 9999) {
+    throw new RangeError("Resulting date must be within 0001-9999");
+  }
   return formatIsoDate(
     target.getUTCFullYear(),
     target.getUTCMonth() + 1,
@@ -100,6 +113,10 @@ export function getEndOfMonth(dateStr: string): string {
  * - 'end_of_month': last day of issued month + days
  */
 export function calculateDueDate(issuedDate: string, term: PaymentTerm): string {
+  parseIsoDate(issuedDate);
+  if (!Number.isSafeInteger(term.days)) {
+    throw new RangeError("Payment term days must be a safe integer");
+  }
   if (term.days < 0) {
     throw new RangeError(`Payment term days cannot be negative: ${term.days}`);
   }

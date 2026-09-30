@@ -1,12 +1,12 @@
 import type { ActionFunctionArgs, HeadersFunction, LoaderFunctionArgs } from "react-router";
-import { Form, Link, redirect, useActionData, useNavigation } from "react-router";
+import { Form, Link, redirect, useActionData, useLoaderData, useNavigation } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { createDebtorAccount } from "../trade-accounts.server";
+import { createDebtorAccount, getOnboardingState } from "../trade-accounts.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
-  return { defaultCurrency: "ZAR" };
+  return { defaults: await getOnboardingState(request) };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -60,6 +60,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function NewDebtorAccount() {
+  const { defaults } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
@@ -121,7 +122,6 @@ export default function NewDebtorAccount() {
                 name="shopifyCustomerId"
                 type="text"
                 placeholder="gid://shopify/Customer/..."
-                defaultValue="gid://shopify/Customer/8192837499"
                 required
                 className="trade-input"
               />
@@ -142,7 +142,7 @@ export default function NewDebtorAccount() {
 
             <div className="trade-field">
               <label htmlFor="currency">Operating Currency</label>
-              <select id="currency" name="currency" defaultValue="ZAR" className="trade-select">
+              <select id="currency" name="currency" defaultValue={defaults.operatingCurrency} className="trade-select">
                 <option value="ZAR">ZAR — South African Rand</option>
                 <option value="USD">USD — US Dollar</option>
                 <option value="EUR">EUR — Euro</option>
@@ -160,7 +160,7 @@ export default function NewDebtorAccount() {
                 type="number"
                 step="0.01"
                 min="0"
-                defaultValue="15000.00"
+                defaultValue={defaults.defaultCreditLimit}
                 required
                 className="trade-input"
               />
@@ -168,7 +168,7 @@ export default function NewDebtorAccount() {
 
             <div className="trade-field">
               <label htmlFor="termsType">Payment Terms</label>
-              <select id="termsType" name="termsType" defaultValue="net_monthly" className="trade-select">
+              <select id="termsType" name="termsType" defaultValue={defaults.defaultTermsType} className="trade-select">
                 <option value="net_monthly">Net Days (e.g. Net 30)</option>
                 <option value="eom">End of Month (EOM)</option>
                 <option value="cod">Cash on Delivery (COD)</option>
@@ -183,14 +183,14 @@ export default function NewDebtorAccount() {
                 type="number"
                 min="0"
                 max="365"
-                defaultValue="30"
+                defaultValue={defaults.defaultTermsDays}
                 className="trade-input"
               />
             </div>
 
             <div className="trade-field">
               <label htmlFor="agingBasis">Aging Basis</label>
-              <select id="agingBasis" name="agingBasis" defaultValue="due_date" className="trade-select">
+              <select id="agingBasis" name="agingBasis" defaultValue={defaults.agingBasis} className="trade-select">
                 <option value="due_date">Due Date Aging (Recommended)</option>
                 <option value="calendar_period">Accounting Calendar Period</option>
               </select>

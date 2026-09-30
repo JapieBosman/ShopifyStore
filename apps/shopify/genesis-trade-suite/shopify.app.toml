@@ -3,11 +3,11 @@
 client_id = "e399f3cb86be83f22534fcb80c3acb60"
 application_url = "https://shopify.dev/apps/default-app-home"
 embedded = true
-name = "Genesis Trade Suite"
+name = "DisplayDeck Trade Suite"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = ""
+scopes = "read_customers,read_products,read_inventory,read_locations,write_draft_orders,write_orders"
 
 [webhooks]
 api_version = "2026-07"

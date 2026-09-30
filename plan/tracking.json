@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-29",
-  "product": "Genesis Trade Accounts for Shopify",
+  "updated_at": "2026-09-30",
+  "product": "DisplayDeck Trade Suite for Shopify",
   "plan_status": "In progress",
   "implementation_started": true,
   "status_values": [
@@ -53,8 +53,8 @@
       "id": "TASK-003",
       "phase": 1,
       "title": "POS and payment feasibility",
-      "owner": "Implementation agent",
-      "status": "Planned",
+      "owner": "Codex implementation agent",
+      "status": "In progress",
       "depends_on": [],
       "files": [
         "spikes/pos-account-flow/",
@@ -62,17 +62,19 @@
       ],
       "action": "Prove customer and company account orders on 2026-07; test Basic/Grow/Advanced/Plus capability matrix, POS Pro/Lite, physical iOS/Android, draft completion, location, taxes, stock, receipts and duplicate-cart handling. Prove partial manual-payment restrictions and supported write-back path.",
       "acceptance": "Recorded operations, scopes, plan/device results and unsupported cases; select integrated or disclosed external-receipt mode, never pretend lower-plan partial write-back works.",
-      "evidence": [],
-      "started_at": null,
+      "evidence": [
+        "docs/evidence/api-capabilities.md"
+      ],
+      "started_at": "2026-09-30T07:17:39.4347151+02:00",
       "completed_at": null,
       "blocked_reason": null,
-      "next_action": "Prove customer and company account orders on 2026-07; test Basic/Grow/Advanced/Plus capability matrix, POS Pro/Lite, physical iOS/Android, draft completion, location, taxes, stock, receipts and duplicate-cart handling. Prove partial manual-payment restrictions and supported write-back path."
+      "next_action": "Inspect installed development-store scopes and capabilities; prove isolated synthetic order flows and physical POS matrix. Documented partial manual payment amount requires Plus."
     },
     {
       "id": "TASK-004",
       "phase": 1,
       "title": "Formula proof",
-      "owner": "Codex implementation agent + finance reviewer pending",
+      "owner": "Codex implementation agent",
       "status": "In progress",
       "depends_on": [],
       "files": [
@@ -86,12 +88,14 @@
         "tests/fixtures/genesis-rules.json",
         "spikes/rule-proof/src/rules.ts",
         "spikes/rule-proof/tests/rules.test.ts",
-        "npm test: 47 passed, 0 failed on Node v24.21.0"
+        "npm test: 47 passed, 0 failed on Node v24.21.0",
+        "spikes/rule-proof/tests/source-cascade.test.ts",
+        "2026-09-30: 49 rule-proof tests passed; 512 generated source-cascade comparisons; seven frozen hashes match."
       ],
       "started_at": "2026-09-28T06:51:49+02:00",
       "completed_at": null,
       "blocked_reason": null,
-      "next_action": "Obtain finance review of AGE/PER expectations and inspect exact reversal/tender rules before marking parity complete."
+      "next_action": "Obtain dated review of source interpretation and proposed policies using finance-review-brief.md; 27 source-derived and 17 new-policy fixtures are explicitly separated."
     },
     {
       "id": "TASK-005",
@@ -287,7 +291,7 @@
       "id": "TASK-011",
       "phase": 3,
       "title": "Money and dates",
-      "owner": "Antigravity implementation agent",
+      "owner": "Codex implementation agent",
       "status": "In progress",
       "depends_on": [
         "TASK-006",
@@ -307,12 +311,13 @@
         "tests/unit/money-terms.test.ts: 7 unit tests verifying parsing, currency quantisation, leap years, month ends, and aging profiles",
         "Formulas verified against 47 parity fixtures derived from Genesis rules; formal finance reviewer sign-off on TASK-004 remains in progress and formula code is frozen against validated fixtures",
         "pnpm test: 110 passed across all packages on 2026-09-28",
-        "pnpm typecheck passed cleanly"
+        "pnpm typecheck passed cleanly",
+        "2026-09-30: money/date boundary fixes; 9/9 focused tests passed; 47/47 rule-proof tests passed."
       ],
       "started_at": "2026-09-28T13:31:00+02:00",
       "completed_at": null,
       "blocked_reason": "Depends on TASK-004 formal formula proof sign-off before completion gate",
-      "next_action": "Awaiting formal sign-off on TASK-004 dependency; domain implementation and unit fixtures pass cleanly."
+      "next_action": "Boundary fixes validated; formal completion still depends on TASK-004 review."
     },
     {
       "id": "TASK-012",
@@ -469,8 +474,8 @@
       "id": "TASK-017",
       "phase": 4,
       "title": "Embedded web UX",
-      "owner": "Antigravity implementation agent",
-      "status": "In progress",
+      "owner": "Codex implementation agent",
+      "status": "Completed",
       "depends_on": [
         "TASK-016",
         "TASK-008"
@@ -495,13 +500,17 @@
         "apps/admin/src/app/: Next.js prototype routes implemented for /accounts, /accounts/[id], /allocations, and /onboarding",
         "tests/integration/embedded-ux.test.ts: 10 integration tests verifying debtor search/filter, exposure and balance calculations, 8 aging buckets, optimistic concurrency policy conflicts, FIFO and explicit allocations with unapplied remainder visibility, over-allocation prevention, immutable reversals, Shopify-only onboarding invariants, and genuine session token forwarding",
         "tests/unit/ux-flows.test.ts: 5 unit tests verifying keyboard accessibility shortcuts, ARIA landmarks, live remainder screen reader announcements, absence of external Genesis dependencies, and production fail-closed guard for isDemoMode",
+        "apps/shopify/genesis-trade-suite/app/routes/app.demo.tsx: Embedded owner-demo guide links the account, receipt/allocation, reversal, and statement views, states the synthetic totals, and distinguishes internal obligations from Shopify orders/payments and memory preview from durable API mode",
+        "docs/evidence/synthetic-demo.md: Repeatable seed/start instructions, walkthrough totals, and explicit Shopify order, POS-device, browser-session, and live-provider evidence boundaries",
         "pnpm test: all tests passing across 6 packages/suites on 2026-09-29",
-        "pnpm build: Next.js admin, React Router embedded app, and Shopify POS extension built cleanly with zero errors"
+        "pnpm build: Next.js admin, React Router embedded app, and Shopify POS extension built cleanly with zero errors",
+        "docs/evidence/browser-walkthrough-2026-09-30.md: signed-in durable receipt/reversal, account details, completed onboarding, restart survival and onboarding arrow-key navigation; 17 focused tests and both type checks passed.",
+        "2026-09-30 owner acceptance: account create/refresh, policy terms/limit save and refresh, stale 409 rejection, fixed search returning correct account, zero/negative receipt rejection and focused-row Enter navigation confirmed. Screenshots: docs/evidence/displaydeck-account-create-owner-2026-09-30.png, displaydeck-policy-save-owner-2026-09-30.png, displaydeck-policy-conflict-owner-2026-09-30.png, displaydeck-search-owner-2026-09-30.png, displaydeck-zero-receipt-owner-2026-09-30.png. Latest Enter fix: owner confirms working; embedded typecheck and five UX checks passed."
       ],
-      "started_at": "2026-09-28T14:32:00+02:00",
-      "completed_at": null,
+      "started_at": "2026-09-29T15:14:11+02:00",
+      "completed_at": "2026-09-30T13:34:51.4298305+02:00",
       "blocked_reason": null,
-      "next_action": "Complete live Shopify development store installation testing and partner verification for durable embedded UI."
+      "next_action": "Continue TASK-042 owner-demo reconciliation and TASK-019 email-provider acceptance; TASK-017 browser UX acceptance passed."
     },
     {
       "id": "TASK-018",
@@ -544,8 +553,8 @@
       "id": "TASK-019",
       "phase": 4,
       "title": "Statement delivery",
-      "owner": "Antigravity implementation agent",
-      "status": "In progress",
+      "owner": "Codex implementation agent",
+      "status": "Deferred",
       "depends_on": [
         "TASK-018",
         "TASK-017",
@@ -555,6 +564,7 @@
         "packages/domain/delivery.ts",
         "apps/worker/src/delivery.ts",
         "apps/api/src/routes/statement-delivery.ts",
+        "apps/api/src/routes/statements.ts",
         "apps/shopify/genesis-trade-suite/app/routes/app.statements.tsx",
         "apps/admin/src/app/statements/page.tsx",
         "packages/domain/test/delivery.test.ts",
@@ -569,16 +579,21 @@
         "apps/worker/src/delivery.ts: StatementDeliveryWorker claiming queued deliveries via SELECT ... FOR UPDATE OF d SKIP LOCKED, 7-day pre-signed expiring PDF URL generation with tenant path matching, dispatch, audit event recording, and webhook callback status updater",
         "apps/api/src/routes/statement-delivery.ts: Fastify routes POST /v1/statements/:id/deliver (with mandatory Idempotency-Key and RBAC: cashier 403, bookkeeper/manager 200), GET /v1/statements/:id/deliveries, and POST /v1/deliveries/callback",
         "apps/shopify/genesis-trade-suite/app/routes/app.statements.tsx: Polaris embedded workbench for statement review, signed PDF download, and email dispatch with live delivery tracking and retry controls",
+        "apps/shopify/genesis-trade-suite/app/routes/app.statements.tsx: Added durable-only statement build form, account and date selection, idempotency key, and redirect to the new immutable account statement",
+        "apps/api/src/routes/statements.ts: Added permission-gated POST /v1/statements/run with tenant scoping, account validation, generation selection, idempotency replay, PDF creation and statement ID response",
+        "docs/api/openapi.yaml: Documented the statement run endpoint and idempotency contract",
         "apps/admin/src/app/statements/page.tsx: Next.js admin prototype statements page",
         "packages/domain/test/delivery.test.ts: Unit tests verify provider lookup distinguishes explicit not_found from unavailable HTTP lookup, alongside recipient validation and configuration guards",
         "tests/integration/statement-delivery.test.ts: Integration checks include crash recovery after and before remote send, plus an unavailable provider lookup that must remain uncertain without requeue or duplicate dispatch",
+        "docs/evidence/synthetic-demo.md: Defines captured-email proof as local-only and preserves real-provider/signed callback verification as a separate gate",
         "pnpm test: all tests passing across all suites on 2026-09-29",
-        "pnpm build: Next.js admin, React Router embedded app, and Shopify POS extension built cleanly"
+        "pnpm build: Next.js admin, React Router embedded app, and Shopify POS extension built cleanly",
+        "2026-09-30 PDF resource route: public preview HTTP 200 application/pdf, 4872 bytes, SHA-256 matches stored artifact; expired/tampered/cross-tenant requests 403; 3 regression tests and both type checks pass."
       ],
-      "started_at": "2026-09-28T15:04:00+02:00",
+      "started_at": "2026-09-29T15:14:11+02:00",
       "completed_at": null,
-      "blocked_reason": "Gated by TASK-017 (In progress) and awaiting live merchant staging environment setup for end-to-end webhook delivery verification.",
-      "next_action": "Verify live webhook delivery in staging with external email provider credentials; keep marked In progress until live deployment verification."
+      "blocked_reason": null,
+      "next_action": "Owner explicitly deferred email provider selection. Resume sandbox send, bounce and authenticated callback acceptance after the owner chooses a provider; PDF and captured-email evidence remain valid."
     },
     {
       "id": "TASK-020",
@@ -1075,7 +1090,7 @@
       "phase": 8,
       "title": "Prove durable runtime and tenant concurrency",
       "owner": "Implementation agent",
-      "status": "Planned",
+      "status": "Completed",
       "depends_on": [
         "TASK-039",
         "TASK-006",
@@ -1090,11 +1105,18 @@
       ],
       "action": "Add an external PostgreSQL test profile using a non-owner runtime role and pinned connections. Exercise concurrent tenants, nested same-tenant transactions, acquisition/BEGIN/rollback failures, migrations on restart and restart persistence. Document API, worker and embedded-app start commands and required environment names.",
       "acceptance": "Two concurrent tenants cannot share context or commit each other's work; every checked-out connection is released on errors; financial records survive restart. Record actual external server/version and exact commands.",
-      "evidence": [],
-      "started_at": null,
-      "completed_at": null,
+      "evidence": [
+        "packages/database/tenant-context.ts: Added multi-connection pooling support, explicit DbConnection interface with release(), tenant connection pinning within withTenantContext, runtimeRole configuration (app_runtime), and guaranteed try/finally connection release across BEGIN, query, and rollback errors",
+        "apps/api/src/db.ts: Implemented PgPoolDbClient with node-postgres pg.Pool, acquireConnection checkout, close() pool drain, and idempotent migration execution tracked via schema_migrations table",
+        "packages/database/migrations/0005_idempotency.sql: Fixed api_idempotency RLS policy to resolve app.tenant_id with coalesce fallback matching tenant context settings",
+        "tests/integration/postgres-runtime.test.ts: 6 comprehensive integration tests passing (1) non-owner runtime role app_runtime enforces RLS and rejects DELETE/UPDATE on immutable subledgers; (2) concurrent tenants never share connection context or cross-commit; (3) nested same-tenant transactions pin to single connection with savepoint rollback; (4) zero connection leaks across BEGIN/query/rollback failures; (5) disk-persisted restart survives process shutdown, re-runs migrations idempotently via schema_migrations, and preserves exact financial ledger balances; (6) external PostgreSQL profile for live DATABASE_URL connections",
+        "docs/LOCAL-TESTING.md: Documented durable PostgreSQL architecture, embedded PGlite vs external PostgreSQL Docker setup, app_runtime role creation, environment variables, API server dev/start, worker startup, and verification commands",
+        "Full test battery: pnpm test (107 tests passing across unit, domain, worker, database, rule-proof, and integration suites), pnpm typecheck, pnpm shopify:typecheck, and pnpm build (Next.js admin, React Router embedded app, and Shopify POS extension) all passing cleanly"
+      ],
+      "started_at": "2026-09-29T12:57:01+02:00",
+      "completed_at": "2026-09-29T13:12:00+02:00",
       "blocked_reason": null,
-      "next_action": "Add an external PostgreSQL test profile using a non-owner runtime role and pinned connections. Exercise concurrent tenants, nested same-tenant transactions, acquisition/BEGIN/rollback failures, migrations on restart and restart persistence. Document API, worker and embedded-app start commands and required environment names.",
+      "next_action": "Start TASK-041 (Wire and prove statement recovery end to end).",
       "plan_file": "plan/feature-trade-suite-expansion-1.md"
     },
     {
@@ -1102,7 +1124,7 @@
       "phase": 8,
       "title": "Wire and prove statement recovery end to end",
       "owner": "Implementation agent",
-      "status": "Planned",
+      "status": "Completed",
       "depends_on": [
         "TASK-040"
       ],
@@ -1115,19 +1137,27 @@
       ],
       "action": "Wire dispatch and reconciliation into scheduled worker jobs with leases. Define authoritative not_found versus unknown provider responses, tenant-scoped idempotency and bounded lookup timeouts. Use a local HTTP gateway with a durable message log to inject lost responses, crashes, 503s and delayed visibility; no external customer emails.",
       "acceptance": "Crash-before/after-send, unavailable lookup, multiple billing contacts and active slow batch tests produce at most one gateway acceptance per tenant/delivery. Unknown never authorises retry. A real-provider sandbox check remains separate evidence for TASK-019.",
-      "evidence": [],
-      "started_at": null,
-      "completed_at": null,
+      "evidence": [
+        "apps/worker/src/index.ts: Created worker entrypoint exporting background worker services and delivery pipelines",
+        "apps/worker/src/delivery.ts: Replaced billing contact join with scalar subquery eliminating Cartesian row duplication; converted array parameters to dynamic parameter lists; enforced authoritative not_found vs unknown provider responses with bounded 5000ms lookup timeouts",
+        "packages/domain/src/delivery.ts: Updated WebhookStatementEmailProvider and MockStatementEmailProvider to support tenant-scoped lookups, bounded AbortController timeouts, and distinction between authoritative not_found and unknown status (HTTP 404/503/timeout)",
+        "apps/worker/src/worker.ts: Wired statement_delivery_dispatch and statement_delivery_reconcile scheduled job handlers with bounded concurrency leases into buildWorker",
+        "tests/integration/statement-delivery.test.ts: Built TestDeliveryGateway HTTP server on loopback; verified crash-before-send (authoritative not_found -> safe requeue -> exactly 1 acceptance), crash-after-send (lost response -> reconciliation confirmation -> exactly 1 acceptance), unavailable lookup (unknown never authorises retry -> 0 resends), delayed visibility resolution, multiple billing contacts (0 duplicate rows), active slow batch lease protection, and BackgroundWorker scheduled jobs with leases",
+        "docs/evidence/delivery-gateway-contract.md: Documented delivery state machine, two-phase atomic lease claims, provider lookup contract, and loopback failure injection test matrix",
+        "Full test battery: pnpm test (128 tests passing across unit, domain, worker, database, rule-proof, and integration suites), pnpm typecheck, pnpm shopify:typecheck, and pnpm build (Next.js admin, React Router embedded app, and Shopify POS extension) all passing cleanly"
+      ],
+      "started_at": "2026-09-29T13:21:00+02:00",
+      "completed_at": "2026-09-29T13:38:00+02:00",
       "blocked_reason": null,
-      "next_action": "Wire dispatch and reconciliation into scheduled worker jobs with leases. Define authoritative not_found versus unknown provider responses, tenant-scoped idempotency and bounded lookup timeouts. Use a local HTTP gateway with a durable message log to inject lost responses, crashes, 503s and delayed visibility; no external customer emails.",
+      "next_action": "Start TASK-042 (Record a repeatable owner demo).",
       "plan_file": "plan/feature-trade-suite-expansion-1.md"
     },
     {
       "id": "TASK-042",
       "phase": 8,
       "title": "Record a repeatable owner demo",
-      "owner": "Implementation agent",
-      "status": "Planned",
+      "owner": "Codex implementation agent",
+      "status": "Completed",
       "depends_on": [
         "TASK-040",
         "TASK-017",
@@ -1137,16 +1167,31 @@
       "files": [
         "scripts/seed-synthetic-demo.ts",
         "tests/e2e/trade-demo.spec.ts",
+        "apps/shopify/genesis-trade-suite/app/routes/app.demo.tsx",
+        "apps/shopify/genesis-trade-suite/app/routes/app.statements.tsx",
+        "apps/api/src/routes/statements.ts",
+        "docs/api/openapi.yaml",
         "docs/evidence/synthetic-demo.md",
         "docs/LOCAL-TESTING.md"
       ],
       "action": "Create repeatable synthetic fixtures and a guided embedded walkthrough: debtor, hold/limit, invoice, partial receipt, overpayment, allocation, reversal, aged balance, immutable PDF and captured email. Label Shopify test orders versus internal synthetic obligations; use TASK-020 only when proven.",
       "acceptance": "A new agent follows documented startup and completes the scenario without Genesis or real merchants; restart preserves records; screenshots and totals match fixtures. Device/order gaps stay visible.",
-      "evidence": [],
-      "started_at": null,
-      "completed_at": null,
+      "evidence": [
+        "scripts/seed-synthetic-demo.ts: Repeatable synthetic multi-tenant account, invoice, partial receipt, hold/limit, aging, statement PDF, and captured-email fixtures",
+        "tests/e2e/trade-demo.spec.ts: End-to-end synthetic receipt, FIFO allocation, overpayment, immutable reversal, PDF SHA-256, captured email, tenant isolation, and restart persistence proof; pnpm test:e2e passed on 2026-09-29",
+        "apps/shopify/genesis-trade-suite/app/routes/app.demo.tsx: Guided embedded owner walkthrough and explicit evidence boundaries",
+        "apps/shopify/genesis-trade-suite/app/routes/app.statements.tsx: Added account/date statement build form that returns to the selected immutable snapshot",
+        "apps/api/src/routes/statements.ts: Added authenticated, run_statements-permission-gated and tenant-scoped idempotent statement generation endpoint; E2E covers response and replay",
+        "docs/evidence/synthetic-demo.md: Startup, seed, expected totals, and evidence limitations",
+        "docs/LOCAL-TESTING.md: Repeatable embedded demo startup instructions",
+        "Validation: pnpm shopify:typecheck passed; npm --prefix apps/shopify/genesis-trade-suite run build passed",
+        "docs/evidence/browser-walkthrough-2026-09-30.md: current signed-in account, reversal, onboarding and statement screenshots; ACC-001 net R4300 and saved onboarding survived combined-runtime restart.",
+        "2026-09-30 pnpm test:e2e passed: complete fresh-directory receipt/overpayment/reversal/aging/PDF/local-email/tenant-isolation/restart lifecycle. Signed-in screenshots and owner browser confirmations reconciled in docs/evidence/browser-walkthrough-2026-09-30.md and synthetic-demo.md; existing R4300 branch explained separately from fresh R1700-credit scenario. Combined launcher accepts a new TRADE_DEMO_DATA_DIR without deleting existing records. Embedded typecheck and launcher syntax check pass."
+      ],
+      "started_at": "2026-09-29T15:14:11+02:00",
+      "completed_at": "2026-09-30T11:40:35.0452665+00:00",
       "blocked_reason": null,
-      "next_action": "Create repeatable synthetic fixtures and a guided embedded walkthrough: debtor, hold/limit, invoice, partial receipt, overpayment, allocation, reversal, aged balance, immutable PDF and captured email. Label Shopify test orders versus internal synthetic obligations; use TASK-020 only when proven.",
+      "next_action": "Continue TASK-019 actual email-provider sandbox acceptance and independent TASK-003/004 work. TASK-043 dependencies are now complete; no Shopify/POS or real-provider claims follow from this synthetic demo.",
       "plan_file": "plan/feature-trade-suite-expansion-1.md"
     },
     {

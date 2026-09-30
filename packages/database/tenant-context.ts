@@ -6,6 +6,7 @@ export interface DbClient {
   query<R = Record<string, unknown>>(query: string, params?: unknown[]): Promise<{ rows: R[] }>;
   exec(sql: string): Promise<unknown>;
   acquireConnection?(): Promise<DbConnection>;
+  close?(): Promise<void>;
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -19,6 +20,10 @@ export function validateTenantId(tenantId: string): string {
 
 const TX_DEPTH = Symbol("tx_depth");
 
+export interface TenantContextOptions {
+  runtimeRole?: string;
+}
+
 /**
  * Executes a callback within an isolated database transaction with the tenant context set.
  * For pooled clients, checks out a dedicated connection from the pool so that BEGIN,
@@ -31,6 +36,7 @@ export async function withTenantContext<T>(
   client: DbClient,
   tenantId: string,
   operation: (client: DbClient) => Promise<T>,
+  options?: TenantContextOptions,
 ): Promise<T> {
   const validTenant = validateTenantId(tenantId);
   const clientAny = client as any;
@@ -61,13 +67,18 @@ export async function withTenantContext<T>(
   const isRoot = depth === 1;
   const savepointName = `sp_${depth}`;
 
-  if (isRoot) {
-    await conn.exec("BEGIN");
-  } else {
-    await conn.exec(`SAVEPOINT ${savepointName}`);
-  }
-
   try {
+    if (isRoot) {
+      await conn.exec("BEGIN");
+    } else {
+      await conn.exec(`SAVEPOINT ${savepointName}`);
+    }
+
+    const runtimeRole = options?.runtimeRole || process.env.PG_RUNTIME_ROLE;
+    if (runtimeRole && isRoot) {
+      await conn.exec(`SET LOCAL ROLE ${runtimeRole}`);
+    }
+
     await conn.query("SELECT set_config('app.tenant_id', $1, true)", [validTenant]);
     const result = await operation(conn);
     if (isRoot) {

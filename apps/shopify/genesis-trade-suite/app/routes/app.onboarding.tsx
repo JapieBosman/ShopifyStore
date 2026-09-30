@@ -1,13 +1,14 @@
 import type { ActionFunctionArgs, HeadersFunction, LoaderFunctionArgs } from "react-router";
 import { Form, Link, redirect, useActionData, useLoaderData, useNavigation } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
+import { handleTabKeyboard } from "../tab-keyboard";
 import { getOnboardingState, updateOnboardingState } from "../trade-accounts.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
-  const onboarding = await getOnboardingState();
+  const onboarding = await getOnboardingState(request);
 
   return {
     onboarding: {
@@ -22,13 +23,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
+  try {
   if (intent === "save_step") {
     const step = Number(formData.get("step") || 1);
     const operatingCurrency = formData.get("operatingCurrency")?.toString();
     const agingBasis = formData.get("agingBasis")?.toString() as "due_date" | "calendar_period";
     const defaultCreditLimit = formData.get("defaultCreditLimit")?.toString();
     const defaultTermsType = formData.get("defaultTermsType")?.toString() as "net_monthly" | "eom" | "cod";
-    const defaultTermsDays = Number(formData.get("defaultTermsDays") || 30);
+    const defaultTermsDays = formData.has("defaultTermsDays") ? Number(formData.get("defaultTermsDays")) : undefined;
 
     await updateOnboardingState({
       operatingCurrency,
@@ -37,7 +39,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       defaultTermsType,
       defaultTermsDays,
       step: Math.min(step + 1, 4),
-    });
+    }, request);
 
     return { success: true, nextStep: step + 1 };
   }
@@ -46,11 +48,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     await updateOnboardingState({
       isCompleted: true,
       step: 4,
-    });
+    }, request);
     return redirect("/app/accounts");
   }
 
   return null;
+  } catch (error) {
+    return { success: false, nextStep: undefined, error: error instanceof Error ? error.message : "Unable to save preferences" };
+  }
 };
 
 export default function OnboardingWizard() {
@@ -59,7 +64,10 @@ export default function OnboardingWizard() {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState<number>(onboarding.step);
+  useEffect(() => {
+    if (actionData?.success && actionData.nextStep) setCurrentStep(actionData.nextStep);
+  }, [actionData]);
 
   return (
     <div className="trade-container" style={{ maxWidth: "880px" }}>
@@ -73,12 +81,15 @@ export default function OnboardingWizard() {
       {/* Invariant Acceptance Notice */}
       <div className="trade-banner trade-banner-info" role="note">
         <div>
-          <strong>Shopify-Native SaaS Architecture:</strong> This suite operates 100% within your Shopify admin and point of sale.
-          {" "}<strong>No Genesis Windows server, no SQL Server credentials, and no external legacy infrastructure are required.</strong>
+          <strong>DisplayDeck Trade Suite:</strong> Manage your trade accounts from Shopify admin.
+          {" "}<strong>Follow the steps below to configure your store and account defaults.</strong>
         </div>
       </div>
 
       {/* Step Indicator */}
+      {actionData && "error" in actionData && actionData.error && (
+        <div className="trade-banner trade-banner-critical" role="alert">{actionData.error}</div>
+      )}
       <div
         role="tablist"
         aria-label="Onboarding Steps"
@@ -101,6 +112,8 @@ export default function OnboardingWizard() {
             type="button"
             role="tab"
             aria-selected={currentStep === s.num}
+            tabIndex={currentStep === s.num ? 0 : -1}
+            onKeyDown={handleTabKeyboard}
             onClick={() => setCurrentStep(s.num)}
             className={`trade-card ${currentStep === s.num ? "active-step" : ""}`}
             style={{
@@ -131,8 +144,8 @@ export default function OnboardingWizard() {
               <span className="trade-badge trade-badge-active">Verified & Active</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "12px", background: "var(--p-color-bg-surface-secondary)", borderRadius: "6px" }}>
-              <span>External Genesis Runtime / Database:</span>
-              <span className="trade-badge trade-badge-info">Not Required (Shopify Native)</span>
+              <span>Installation:</span>
+              <span className="trade-badge trade-badge-info">Shopify embedded app</span>
             </div>
           </div>
 
@@ -152,7 +165,7 @@ export default function OnboardingWizard() {
       {currentStep === 2 && (
         <div className="trade-card" role="region" aria-label="Step 2: Currency and Aging Preferences">
           <h2 className="trade-card-title" style={{ marginBottom: "16px" }}>Operating Currency & Regional Aging</h2>
-          <Form method="post" onSubmit={() => setCurrentStep(3)}>
+          <Form method="post">
             <input type="hidden" name="intent" value="save_step" />
             <input type="hidden" name="step" value="2" />
 
@@ -166,7 +179,7 @@ export default function OnboardingWizard() {
                 <option value="CAD">CAD — Canadian Dollar (C$)</option>
                 <option value="AUD">AUD — Australian Dollar (A$)</option>
               </select>
-              <span className="trade-field-hint">Matches your Shopify store primary settlement currency</span>
+              <span className="trade-field-hint">Must match the ledger base currency. Changing currency requires a separate ledger.</span>
             </div>
 
             <div className="trade-field">
@@ -186,7 +199,7 @@ export default function OnboardingWizard() {
               >
                 ← Back
               </button>
-              <button type="submit" className="trade-btn trade-btn-primary">
+              <button type="submit" disabled={isSubmitting} className="trade-btn trade-btn-primary">
                 Save & Continue to Policies →
               </button>
             </div>
@@ -198,7 +211,7 @@ export default function OnboardingWizard() {
       {currentStep === 3 && (
         <div className="trade-card" role="region" aria-label="Step 3: Default Trade Credit Policies">
           <h2 className="trade-card-title" style={{ marginBottom: "16px" }}>Default Trade Policies</h2>
-          <Form method="post" onSubmit={() => setCurrentStep(4)}>
+          <Form method="post">
             <input type="hidden" name="intent" value="save_step" />
             <input type="hidden" name="step" value="3" />
 
@@ -214,7 +227,7 @@ export default function OnboardingWizard() {
                 required
                 className="trade-input"
               />
-              <span className="trade-field-hint">Assigned automatically to new trade accounts</span>
+              <span className="trade-field-hint">Saved setup preference; review the limit when creating each account.</span>
             </div>
 
             <div className="trade-field">
@@ -247,7 +260,7 @@ export default function OnboardingWizard() {
               >
                 ← Back
               </button>
-              <button type="submit" className="trade-btn trade-btn-primary">
+              <button type="submit" disabled={isSubmitting} className="trade-btn trade-btn-primary">
                 Save & Continue to Verification →
               </button>
             </div>
@@ -260,7 +273,7 @@ export default function OnboardingWizard() {
         <div className="trade-card" role="region" aria-label="Step 4: Verification and Final Setup">
           <h2 className="trade-card-title" style={{ marginBottom: "16px" }}>Ready to Trade</h2>
           <p style={{ color: "var(--p-color-text-secondary)", marginBottom: "16px" }}>
-            All configuration is stored directly in your Shopify app instance. Your initial sample trade debtor (Ubuntu Hardware Trade) has been seeded with realistic balances and open invoices for immediate testing.
+            Preferences are saved for this tenant in the trade service. Review account policies before posting transactions. Development demo accounts contain synthetic balances and invoices.
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px", marginBottom: "20px" }}>
@@ -270,7 +283,7 @@ export default function OnboardingWizard() {
             </div>
             <div style={{ padding: "14px", border: "1px solid var(--p-color-border)", borderRadius: "6px" }}>
               <div style={{ fontWeight: 600, marginBottom: "4px" }}>Currency</div>
-              <div style={{ fontSize: "13px" }}>{onboarding.operatingCurrency} (South African Rand)</div>
+              <div style={{ fontSize: "13px" }}>{onboarding.operatingCurrency}</div>
             </div>
             <div style={{ padding: "14px", border: "1px solid var(--p-color-border)", borderRadius: "6px" }}>
               <div style={{ fontWeight: 600, marginBottom: "4px" }}>Aging Engine</div>

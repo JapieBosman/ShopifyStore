@@ -17,6 +17,24 @@ export interface AccountsRouteOptions extends AuthResolverOptions {
   idempotencyStore: IdempotencyStore;
 }
 
+function requestedTerms(type: unknown, days: unknown) {
+  if (type === undefined && days === undefined) return undefined;
+  const kinds = { net_monthly: "net_days", eom: "end_of_month", cod: "cod" } as const;
+  if (typeof type !== "string" || !(type in kinds)) throw new Error("Invalid payment terms type");
+  if (typeof days !== "number" || !Number.isInteger(days) || days < 0 || days > 365) throw new Error("Payment days must be an integer from 0 to 365");
+  const kind = kinds[type as keyof typeof kinds];
+  return { kind, days: kind === "cod" ? 0 : days };
+}
+
+async function resolveTerms(db: DbClient, tenantId: string, terms: { kind: string; days: number }) {
+  const result = await db.query<{ id: string }>(
+    `INSERT INTO payment_term (tenant_id, code, kind, days) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (tenant_id, code) DO UPDATE SET code = EXCLUDED.code RETURNING id`,
+    [tenantId, `APP_${terms.kind.toUpperCase()}_${terms.days}`, terms.kind, terms.days],
+  );
+  return result.rows[0]!.id;
+}
+
 export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (fastify, opts) => {
   const { db, idempotencyStore } = opts;
 
@@ -153,7 +171,7 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
         tx.query<Record<string, unknown>>(
           `SELECT id, account_number, legal_name, trade_name, currency, credit_limit,
                   status, hold_reason, require_po, require_job_reference, aging_basis,
-                  policy_version, ledger_version, created_at
+                  policy_version, ledger_version, created_at, payment_term_id
            FROM debtor_account
            WHERE tenant_id = $1 AND id = $2`,
           [tenantId, id],
@@ -169,6 +187,21 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
       }
 
       const debtor = debtorRes.rows[0]!;
+      const metadata = await withTenantContext(db, tenantId, async (tx) => {
+        const term = await tx.query<{ kind: string; days: number }>(
+          "SELECT kind, days FROM payment_term WHERE tenant_id = $1 AND id = $2", [tenantId, debtor.payment_term_id],
+        );
+        const identities = await tx.query<{ kind: string; shopify_gid: string }>("SELECT kind, shopify_gid FROM debtor_identity WHERE tenant_id = $1 AND debtor_account_id = $2 ORDER BY created_at, id", [tenantId, id]);
+        const contact = await tx.query<{ email: string | null; phone: string | null }>("SELECT email, phone FROM billing_contact WHERE tenant_id = $1 AND debtor_account_id = $2 ORDER BY created_at, id LIMIT 1", [tenantId, id]);
+        return {
+          terms_type: term.rows[0]!.kind === "net_days" ? "net_monthly" : term.rows[0]!.kind === "end_of_month" ? "eom" : "cod",
+          terms_days: term.rows[0]!.days,
+          shopify_customer_id: identities.rows.find((identity) => identity.kind === "customer")?.shopify_gid ?? "",
+          shopify_company_id: identities.rows.find((identity) => identity.kind === "company")?.shopify_gid ?? null,
+          contact_email: contact.rows[0]?.email ?? "",
+          contact_phone: contact.rows[0]?.phone ?? "",
+        };
+      });
 
       // Live balance summary
       const balance = await getDebtorBalanceSummary(db, tenantId, id);
@@ -207,7 +240,7 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
       );
 
       return reply.code(200).send({
-        account: debtor,
+        account: { ...debtor, ...metadata },
         balance,
         credit,
         aging: {
@@ -238,6 +271,12 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
         tradeName?: string;
         currency?: string;
         paymentTermId?: string;
+        termsType?: string;
+        termsDays?: number;
+        shopifyCustomerId?: string;
+        shopifyCompanyId?: string | null;
+        contactEmail?: string;
+        contactPhone?: string;
         creditLimit?: string;
         status?: "active" | "hold" | "stopped" | "closed";
         agingBasis?: "due_date" | "calendar_period";
@@ -277,9 +316,18 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
         });
       }
 
+      let terms;
+      try {
+        terms = requestedTerms(body.termsType, body.termsDays);
+        if (body.shopifyCustomerId && !/^gid:\/\/shopify\/Customer\/\d+$/.test(body.shopifyCustomerId)) throw new Error("Invalid Shopify Customer GID");
+        if (body.shopifyCompanyId && !/^gid:\/\/shopify\/Company\/\d+$/.test(body.shopifyCompanyId)) throw new Error("Invalid Shopify Company GID");
+      } catch (error) {
+        return reply.code(400).send({ message: (error as Error).message });
+      }
       const res = await withTenantContext(db, tenantId, async (tx) => {
         // Resolve payment term: use specified ID or look up/create tenant default
         let resolvedTermId = body.paymentTermId;
+        if (terms) resolvedTermId = await resolveTerms(tx, tenantId, terms);
         if (!resolvedTermId) {
           const defaultTermRes = await tx.query<{ id: string }>(
             "SELECT id FROM payment_term WHERE tenant_id = $1 ORDER BY code ASC LIMIT 1",
@@ -337,7 +385,15 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
           ],
         );
 
-        return { account: insertRes.rows[0]! };
+        const account = insertRes.rows[0]!;
+        for (const [kind, gid] of [["customer", body.shopifyCustomerId], ["company", body.shopifyCompanyId]]) {
+          if (gid) await tx.query("INSERT INTO debtor_identity (tenant_id, debtor_account_id, kind, shopify_gid) VALUES ($1, $2, $3, $4)", [tenantId, account.id, kind, gid]);
+        }
+        if (body.contactEmail || body.contactPhone) await tx.query(
+          "INSERT INTO billing_contact (tenant_id, debtor_account_id, name, email, phone) VALUES ($1, $2, $3, $4, $5)",
+          [tenantId, account.id, body.legalName, body.contactEmail || null, body.contactPhone || null],
+        );
+        return { account };
       });
 
       if ("error" in res) {
@@ -385,6 +441,8 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
       const { id } = request.params as { id: string };
       const body = request.body as {
         reason?: string;
+        termsType?: string;
+        termsDays?: number;
         expectedPolicyVersion?: number;
         creditLimit?: string;
         status?: "active" | "hold" | "stopped" | "closed";
@@ -402,6 +460,12 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
         });
       }
 
+      let terms;
+      try {
+        terms = requestedTerms(body.termsType, body.termsDays);
+      } catch (error) {
+        return reply.code(400).send({ message: (error as Error).message });
+      }
       const result = await withTenantContext(db, tenantId, async (tx) => {
         const debtorRes = await tx.query<{
           id: string;
@@ -429,6 +493,7 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
         const newCreditLimit = body.creditLimit ? formatMoney(parseMoney(body.creditLimit)) : debtor.credit_limit;
         const newStatus = body.status ?? debtor.status;
         const newPolicyVersion = debtor.policy_version + 1;
+        const newTermId = terms ? await resolveTerms(tx, tenantId, terms) : null;
 
         const updateRes = await tx.query<Record<string, unknown>>(
           `UPDATE debtor_account
@@ -438,7 +503,8 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
                aging_basis = COALESCE($4, aging_basis),
                require_po = COALESCE($5, require_po),
                require_job_reference = COALESCE($6, require_job_reference),
-               policy_version = $7
+               policy_version = $7,
+               payment_term_id = COALESCE($10::uuid, payment_term_id)
            WHERE tenant_id = $8 AND id = $9
            RETURNING *`,
           [
@@ -451,6 +517,7 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
             newPolicyVersion,
             tenantId,
             id,
+            newTermId,
           ],
         );
 
@@ -481,6 +548,7 @@ export const accountsRoutes: FastifyPluginAsync<AccountsRouteOptions> = async (f
               newStatus,
               previousCreditLimit: debtor.credit_limit,
               newCreditLimit,
+              terms,
             }),
           ],
         );

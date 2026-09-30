@@ -1,5 +1,6 @@
 import type { ActionFunctionArgs, HeadersFunction, LoaderFunctionArgs } from "react-router";
-import { Form, Link, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
+import { randomUUID } from "node:crypto";
+import { Form, Link, redirect, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
 import { useState } from "react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
@@ -8,6 +9,7 @@ import {
   getStatement,
   deliverStatement,
   getStatementDeliveries,
+  buildStatementRun,
   isDemoMode,
   type StatementRecord,
   type StatementDeliveryRecord,
@@ -16,7 +18,7 @@ import {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
   const url = new URL(request.url);
-  const statementId = url.searchParams.get("statementId") || "stmt-demo-001";
+  const statementId = url.searchParams.get("statementId") || (isDemoMode() ? "stmt-demo-001" : "");
 
   const allAccounts = await getDebtorsList(undefined, undefined, request);
   let statement: StatementRecord | null = null;
@@ -24,8 +26,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   let error: string | null = null;
 
   try {
-    statement = await getStatement(statementId, request);
-    deliveries = await getStatementDeliveries(statementId, request);
+    if (statementId) {
+      statement = await getStatement(statementId, request);
+      deliveries = await getStatementDeliveries(statementId, request);
+    }
   } catch (err) {
     error = (err as Error).message;
   }
@@ -33,6 +37,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return {
     accounts: allAccounts,
     statementId,
+    buildIdempotencyKey: randomUUID(),
+    defaultPeriodFrom: `${new Date().toISOString().slice(0, 7)}-01`,
+    defaultPeriodTo: new Date().toISOString().slice(0, 10),
     statement,
     deliveries,
     error,
@@ -44,6 +51,28 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   await authenticate.admin(request);
   const formData = await request.formData();
   const intent = formData.get("intent");
+
+  if (intent === "build") {
+    const debtorAccountId = formData.get("debtorAccountId")?.toString() || "";
+    const periodFrom = formData.get("periodFrom")?.toString() || "";
+    const periodTo = formData.get("periodTo")?.toString() || "";
+    const idempotencyKey = formData.get("idempotencyKey")?.toString() || "";
+
+    if (!debtorAccountId || !periodFrom || !periodTo || !idempotencyKey) {
+      return { success: false, error: "Choose an account and a valid statement period." };
+    }
+
+    try {
+      const run = await buildStatementRun(
+        { debtorAccountId, periodFrom, periodTo },
+        idempotencyKey,
+        request,
+      );
+      return redirect(`/app/statements?statementId=${encodeURIComponent(run.statementId)}`);
+    } catch (err) {
+      return { success: false, error: (err as Error).message };
+    }
+  }
 
   if (intent === "deliver") {
     const statementId = formData.get("statementId")?.toString() || "";
@@ -72,7 +101,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function StatementsWorkbench() {
-  const { statementId, statement, deliveries, error, isDemo } = useLoaderData<typeof loader>();
+  const {
+    accounts,
+    statementId,
+    buildIdempotencyKey,
+    defaultPeriodFrom,
+    defaultPeriodTo,
+    statement,
+    deliveries,
+    error,
+    isDemo,
+  } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -157,6 +196,35 @@ export default function StatementsWorkbench() {
           Notice: {error}
         </div>
       )}
+
+      <div className="trade-card" role="region" aria-label="Build statement snapshot">
+        <h2 className="trade-card-title">Build a Statement Snapshot</h2>
+        <p>Creates an immutable statement run from the current durable ledger. Building is disabled in in-memory preview mode.</p>
+        <Form method="post" style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "end" }}>
+          <input type="hidden" name="intent" value="build" />
+          <input type="hidden" name="idempotencyKey" value={buildIdempotencyKey} />
+          <div className="trade-field">
+            <label htmlFor="statementDebtorAccountId">Account</label>
+            <select id="statementDebtorAccountId" name="debtorAccountId" required defaultValue={accounts[0]?.id || ""} className="trade-select">
+              {accounts.map((account) => (
+                <option key={account.id} value={account.id}>{account.accountNumber} — {account.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="trade-field">
+            <label htmlFor="statementPeriodFrom">From</label>
+            <input id="statementPeriodFrom" name="periodFrom" type="date" required defaultValue={defaultPeriodFrom} className="trade-input" />
+          </div>
+          <div className="trade-field">
+            <label htmlFor="statementPeriodTo">To</label>
+            <input id="statementPeriodTo" name="periodTo" type="date" required defaultValue={defaultPeriodTo} className="trade-input" />
+          </div>
+          <button type="submit" disabled={isSubmitting || isDemo || accounts.length === 0} className="trade-btn trade-btn-primary">
+            {isSubmitting ? "Building Snapshot…" : "Build Immutable Statement"}
+          </button>
+        </Form>
+        {isDemo && <p role="note">Connect the durable Trade API to build and persist statement snapshots.</p>}
+      </div>
 
       {statement ? (
         <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "1.5rem" }}>

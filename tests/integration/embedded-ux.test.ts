@@ -470,11 +470,29 @@ describe("TASK-017: Embedded Web UX & API Contracts", () => {
             creditLimit: "85000.00",
             expectedPolicyVersion: 1,
             reason: "Annual credit line increase",
+            termsType: "eom",
+            termsDays: 15,
           },
           managerRequest,
         );
         assert.equal(updated.creditLimit, "85000.00");
         assert.equal(updated.policyVersion, 2);
+        const changedPolicy = await getDebtorDetails(debtorId, managerRequest);
+        assert.equal(changedPolicy!.account.termsType, "eom");
+        assert.equal(changedPolicy!.account.termsDays, 15);
+        const newAccount = await createDebtorAccount({
+          accountNumber: "LIVE-DEBT-02", name: "Synthetic mapped customer",
+          shopifyCustomerId: "gid://shopify/Customer/999001",
+          shopifyCompanyId: "gid://shopify/Company/999002",
+          currency: "ZAR", creditLimit: "1000.00", termsType: "cod", termsDays: 0,
+          agingBasis: "due_date", contactEmail: "synthetic@example.test", contactPhone: "",
+        }, managerRequest);
+        const mapped = await getDebtorDetails(newAccount.id, managerRequest);
+        assert.equal(mapped!.account.shopifyCustomerId, "gid://shopify/Customer/999001");
+        assert.equal(mapped!.account.shopifyCompanyId, "gid://shopify/Company/999002");
+        assert.equal(mapped!.account.contactEmail, "synthetic@example.test");
+        assert.equal(mapped!.account.termsType, "cod");
+        assert.equal(mapped!.account.termsDays, 0);
 
         // 8. An unauthenticated request without session token fails closed with 401
         const unauthenticatedRequest = new Request("https://displaydeck.myshopify.com/app/accounts");

@@ -21,7 +21,7 @@ export default function OnboardingPage() {
 
       {/* Prominent Architectural Invariant Notice */}
       <div style={{ background: "#e1f0f7", border: "1px solid #b2d7e8", padding: "16px", borderRadius: "8px", margin: "20px 0", color: "#025982" }}>
-        <strong>Shopify-Native Architecture:</strong> Genesis Trade Accounts is a modern cloud SaaS application.
+        <strong>Shopify-Native Architecture:</strong> DisplayDeck Trade Suite is a modern cloud SaaS application.
         It runs entirely on Shopify App Bridge and modern cloud APIs. <strong>No Genesis Windows runtime, no SQL Server credentials, and no on-premise hardware setup are required.</strong>
       </div>
 

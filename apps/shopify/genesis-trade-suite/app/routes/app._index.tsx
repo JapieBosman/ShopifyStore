@@ -30,7 +30,7 @@ export default function Index() {
     <div className="trade-container">
       <div className="trade-header">
         <div className="trade-header-title">
-          <h1>Genesis Trade Suite</h1>
+          <h1>DisplayDeck Trade Suite</h1>
           <p>Connected store: <strong>{shop}</strong> · Pure Shopify-native trade accounts</p>
         </div>
       </div>
@@ -39,6 +39,10 @@ export default function Index() {
         <div>
           <strong>Phase 4 Embedded Preview:</strong> Trade account management, allocation workbench, and onboarding are fully active. All calculations use the verified pure TypeScript domain engine.
         </div>
+      </div>
+
+      <div style={{ marginBottom: "16px" }}>
+        <a href="/app/demo" className="trade-btn trade-btn-secondary">Open the repeatable owner demo →</a>
       </div>
 
       <div className="trade-metrics-grid">
@@ -65,7 +69,7 @@ export default function Index() {
         <div className="trade-card" style={{ margin: 0 }}>
           <h2 className="trade-card-title">Setup & Onboarding</h2>
           <p style={{ color: "var(--p-color-text-secondary)", fontSize: "14px", margin: "8px 0 16px" }}>
-            Configure regional currency, aging profiles, default credit rules. Zero Genesis server required.
+            Configure regional currency, aging profiles, and default credit rules.
           </p>
           <a href="/app/onboarding" className="trade-btn trade-btn-secondary">
             View Setup Wizard →

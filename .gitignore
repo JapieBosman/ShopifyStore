@@ -3,7 +3,11 @@ node_modules/
 .next/
 dist/
 coverage/
+.data/
 .env
 .env.*
 !.env.example
 *.log
+artifacts/statements/
+apps/shopify/genesis-trade-suite/artifacts/
+.agents/teamwork/

@@ -1,0 +1,8 @@
+query TradeTestCapabilities {
+  currentAppInstallation {
+    accessScopes { handle }
+  }
+  shop {
+    plan { publicDisplayName shopifyPlus partnerDevelopment }
+  }
+}

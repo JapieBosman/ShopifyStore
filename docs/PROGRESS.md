@@ -410,3 +410,140 @@
 - Updated `plan/tracking.json` and `plan/feature-trade-suite-expansion-1.md` marking TASK-039 Completed.
 - Exact next ready task: **TASK-040 (Prove durable runtime and tenant concurrency)**.
 
+## 2026-09-29 — TASK-040: Durable runtime and tenant concurrency proved
+
+- Implemented durable PostgreSQL multi-connection pooling and tenant connection pinning in `packages/database/tenant-context.ts`:
+  - Added `DbConnection` interface with dedicated `release()` lifecycle.
+  - Pinned all tenant transactions (`withTenantContext`), statements, and nested savepoints to a single checked-out connection.
+  - Added support for non-owner runtime role (`runtimeRole`, defaulting to `process.env.PG_RUNTIME_ROLE || "app_runtime"`) executed per transaction via `SET LOCAL ROLE`.
+  - Enforced strict connection leak prevention with guaranteed `try / finally` connection release back to the pool across `BEGIN`, query, business logic, or `ROLLBACK` failures.
+- Implemented `PgPoolDbClient` and idempotent migration runner in `apps/api/src/db.ts`:
+  - Wrapped `node-postgres` `pg.Pool` with connection checkout (`acquireConnection`), query execution, and graceful pool drain (`close()`).
+  - Implemented `schema_migrations` tracking table to ensure migrations (`0001_core.sql` through `0005_idempotency.sql`) execute idempotently without collision on database restart.
+- Fixed `packages/database/migrations/0005_idempotency.sql`:
+  - Updated `api_idempotency` RLS policy to resolve `app.tenant_id` with coalesce fallback matching tenant context settings.
+- Authored comprehensive integration test suite in `tests/integration/postgres-runtime.test.ts` (6 passing tests):
+  1. Non-owner runtime role (`app_runtime`) RLS enforcement and immutability (denied `UPDATE` and `DELETE` on subledgers `journal`, `journal_line`, `document`, and `audit_event`).
+  2. Concurrent tenant isolation: two concurrent tenants over pooled connections execute interleaved async operations simultaneously without ever sharing context or cross-committing.
+  3. Nested same-tenant transactions pin to a single connection with savepoint rollback on error and root commit on success.
+  4. Pool leak prevention: verified 100% of checked-out connections are released back to the pool under user operation failures, query execution errors, and connection `BEGIN` errors.
+  5. Disk-persisted restart: boots a persisted database directory, posts financial journals and documents, shuts down the process, restarts against the same data directory, idempotently skips applied migrations, verifies identical ledger balances and debtor state without drift, and successfully posts new settlements.
+  6. External PostgreSQL profile: validates node-postgres pool configuration and executes live against `DATABASE_URL` when provided.
+- Updated `docs/LOCAL-TESTING.md`:
+  - Documented durable PostgreSQL architecture, connection pinning, tenant isolation, and non-owner `app_runtime` privileges.
+  - Added Docker command to launch PostgreSQL 16 and create the `app_runtime` non-owner role.
+  - Added startup commands for the durable API server (`pnpm --filter @genesis-shopify/api dev` / `start`), background worker (`pnpm --filter @genesis-shopify/worker start`), and test suites.
+- Full verification passed:
+  - `node --test tests/integration/postgres-runtime.test.ts`: 6/6 tests passing.
+  - `pnpm test`: 107 tests passing across unit, domain, worker, database, rule-proof, and integration suites.
+  - `pnpm typecheck`: passed cleanly.
+  - `pnpm shopify:typecheck`: passed cleanly.
+  - `pnpm build`: Next.js admin, React Router embedded app, and Shopify POS extension all built successfully.
+- Marked TASK-040 as Completed in `plan/tracking.json` and `plan/feature-trade-suite-expansion-1.md`.
+- Exact next ready task: **TASK-041 (Wire and prove statement recovery end to end)**.
+
+## 2026-09-29 — TASK-041: Statement recovery wired and proved end to end
+
+- Fixed and completed statement delivery dispatch engine in `apps/worker/src/delivery.ts`:
+  - Replaced `LEFT JOIN billing_contact` with a scalar subquery `(SELECT bc.email FROM billing_contact bc WHERE ... LIMIT 1)` to eliminate Cartesian row duplication when multiple billing contacts exist with `send_statements = true`.
+  - Replaced array parameters with parameterized dynamic placeholders (`WHERE id IN ($2, $3, ...)`), resolving PGlite WASM array parameter binding limitations.
+  - Implemented two-phase atomic lease claims (`status = 'sending'`, updated attempt count, and last attempt timestamp) within a short-lived transaction prior to external gateway dispatch.
+- Implemented robust reconciliation in `apps/worker/src/delivery.ts`:
+  - Enforced the core architectural invariant: **"Unknown never authorises retry"**.
+  - Bounded provider lookups with strict 5000ms timeouts using `AbortController`.
+  - Only explicit, authoritative `not_found` responses (where the provider confirms the message was never received) authorise requeueing when attempts remain.
+  - Network timeouts, HTTP 503s, and ambiguous gateway responses preserve `uncertain` status without requeueing or sending duplicate emails.
+- Enhanced domain delivery layer in `packages/domain/src/delivery.ts`:
+  - Updated `WebhookStatementEmailProvider` and `MockStatementEmailProvider` to support tenant-scoped queries, custom timeouts, and distinguish authoritative `not_found` (HTTP 404) from `unknown` (HTTP 503 or transient network failure).
+- Wired background worker scheduling in `apps/worker/src/worker.ts` & `apps/worker/src/index.ts`:
+  - Registered `statement_delivery_dispatch` and `statement_delivery_reconcile` handlers in `buildWorker(db)` with lease protection.
+  - Created root worker entrypoint `apps/worker/src/index.ts` exporting all worker classes and delivery runners.
+- Built comprehensive loopback test gateway and integration test suite in `tests/integration/statement-delivery.test.ts`:
+  - Created `TestDeliveryGateway` running on loopback (`127.0.0.1`) with configurable failure injection (dropped socket connections, crashes, 503s, delayed visibility, artificial latency).
+  - Verified 7 new gateway recovery scenarios:
+    1. **Crash-Before-Send:** Provider confirms `not_found` -> safely requeued and dispatched -> exactly 1 acceptance.
+    2. **Crash-After-Send:** Lost network response -> reconciliation checks gateway log -> confirms `accepted` -> exactly 1 acceptance.
+    3. **Unavailable Lookup:** 503 gateway lookup outage -> leaves delivery in `uncertain` without requeueing (0 re-sends).
+    4. **Delayed Visibility:** Provider reports `unknown` during indexing delay -> subsequent pass confirms `accepted` -> exactly 1 acceptance.
+    5. **Multiple Billing Contacts:** Zero Cartesian multiplication -> exactly 1 acceptance per recipient.
+    6. **Active Slow Batch:** Leased in-flight batches are never re-claimed or duplicated by concurrent workers.
+    7. **BackgroundWorker Leases:** Scheduled dispatch and reconciliation jobs respect bounded lease ownership.
+- Authored contract documentation in `docs/evidence/delivery-gateway-contract.md`:
+  - Fully detailed delivery state machine, two-phase atomic lease model, provider lookup contracts, and loopback failure verification proof.
+- Full verification passed:
+  - `pnpm test`: 128 tests passing across domain, database, api, worker, rule-proof, and integration suites (exit code 0).
+  - `pnpm typecheck`: passed cleanly (exit code 0).
+  - `pnpm shopify:typecheck`: passed cleanly (exit code 0).
+  - `pnpm build`: Next.js admin, React Router embedded app, and Shopify POS extension built cleanly (exit code 0).
+- Marked TASK-041 as Completed in `plan/tracking.json` and `plan/feature-trade-suite-expansion-1.md`.
+- Exact next ready task: **TASK-042 (Record a repeatable owner demo)**.
+
+
+
+## 2026-09-29 — Continue TASK-017/019 and TASK-042 owner demo
+
+- Added an embedded `/app/demo` guide, linked it from the app home/navigation, and added a Statements navigation item.
+- Added a durable-only embedded statement build form and authenticated `POST /v1/statements/run` endpoint with tenant/account checks, `run_statements` permission, generated statement ID, and idempotency replay. The owner-demo E2E now builds the after-reversal statement through this API path.
+- Documented persistent seeding/startup, synthetic account/invoice/receipt figures, reversal and overpayment totals, PDF hash and local captured-email proof in `docs/evidence/synthetic-demo.md` and `docs/LOCAL-TESTING.md`.
+- `pnpm test:e2e` passed: 1 lifecycle test covering synthetic seeding/idempotency, credit decisions, partial and overpayment receipts, allocations, reversal, idempotent statement build, aged balances, immutable statement PDF, captured email, tenant isolation and database restart persistence.
+- `pnpm shopify:typecheck` passed. `npm --prefix apps/shopify/genesis-trade-suite run build` passed.
+- Started `pnpm shopify:dev` against the existing DisplayDeck app/store. The preview URL reached Shopify login, but the CLI exited during its `npx prisma generate` predev command with a Windows `EPERM` rename on the generated query engine. No authenticated browser evidence or live preview process remains from this attempt.
+- TASK-017 remains In progress pending authenticated durable-flow/accessibility evidence. TASK-019 remains In progress pending provider sandbox send/callback and authenticated verification of the new embedded statement-build flow. TASK-042 remains In progress pending current embedded screenshots and visible browser totals; synthetic orders/POS behavior are not claimed.
+- Next: resolve the Prisma predev `EPERM`, start the DisplayDeck preview, sign in and follow `/app/demo`, capture account/allocation/statement evidence, and separately verify configured email-provider delivery/callback.
+
+## 2026-09-30 — TASK-003/004/011/017 continuation
+- Recovered Prisma generation: npx prisma generate passed. pnpm shopify:dev reached Ready and started the DisplayDeck preview; no old app preview Node processes were running. Earlier EPERM did not recur.
+- Fixed money/date boundary validation: invalid COD dates, fractional/non-finite day offsets and unsupported currency precision are rejected; years 0001-0099 now retain their actual year; date overflow outside 0001-9999 is rejected.
+- Validation: node --test tests/unit/money-terms.test.ts passed 9/9; npm test --prefix spikes/rule-proof passed 47/47.
+- Added docs/evidence/finance-review-brief.md with synthetic worked examples, reviewer scope and SAIPA directory. No independent approval is claimed.
+- User requested the regular browser. Windows Computer Use selected Edge but stopped because it could not establish the current URL confidently enough to enforce its browser policy. No Edge input or browser acceptance completed. In-app preview remains at Shopify login. TASK-017 remains open.
+- TASK-003 remains open: documentation confirms Plus-only amount field for partial manual payment; physical POS and plan matrix not observed. Next: authenticated browser acceptance, platform spike, source review and independent finance decision.
+
+## 2026-09-30 — Signed-in browser acceptance and status reconciliation
+- Exercised durable synthetic ACC-001 receipt R2000 and allocation reversal; net balance R4300 survived preview/API restart. Completed onboarding steps 2-4 and verified saved preferences and arrow-key tab navigation after restart.
+- Fixed nested account routing, actual allocation totals/reversal response, receipt retry keys, tenant-persisted onboarding and validation, fresh App Bridge tokens for app fetches, stored account identity/contact/terms mappings and payment-term writes. New-account form uses saved defaults.
+- Built an embedded immutable statement with closing balance R4300. PDF link verification stopped because Computer Use could not establish the browser URL confidently. PDF routing still needs verification; no live email or POS outcome claimed.
+- Validation: 17 focused tests passed; pnpm typecheck and pnpm shopify:typecheck passed. Shopify standalone UI validator could not resolve installed React Router/App Bridge modules, so no validator approval is claimed.
+- Corrected stale tracker blockers for TASK-017/019/042. All remain In progress; next work is PDF routing/download, remaining account/policy and keyboard browser acceptance, then complete owner-demo evidence. TASK-003 physical platform/device and TASK-004/011 finance gates remain open.
+
+## 2026-09-30 — Fix embedded statement PDF 404 (TASK-019/042)
+- Added app/routes/v1.statements.download.ts and statement-download.server.ts to forward signed download requests to the configured API, preserve PDF bytes/status/storage redirects, and disable caching.
+- Valid statement returned HTTP 200 application/pdf with 4872 bytes from API, embedded local server and public Shopify preview tunnel. API and embedded SHA-256 both match the statement hash 81cb9db36be748a847844c2fb7542108cf4daf93e45e279efd7faa2a30144152.
+- Embedded requests with tampered signature, expired link and another tenant all returned 403. Three download regression tests passed; root and embedded type checks passed.
+- Browser rendering remains owner confirmation; no live email-provider outcome claimed. TASK-019/042 remain In progress.
+
+## 2026-09-30 — TASK-017 owner checks and search repair
+- Owner screenshots confirm TEST-017-01 creation (R15000 limit, zero balance, Net30), policy save (R18000, Net45, v2) and stale policy rejection (409 expected3/current4; attempted R21000 rejected, saved R20000). Owner confirms refresh persistence and successful PDF browser download. Saved screenshots in docs/evidence/displaydeck-*-owner-2026-09-30.png.
+- Owner reported Enter search did not show the account. Replaced native GET form with React Router Form targeting /app/accounts so requests use the authenticated app fetch flow; added pending state, result count and input reset after changed search.
+- pnpm shopify:typecheck and 6 focused UX/authenticated-fetch tests passed. Search browser retest pending; TASK-017 remains In progress.
+
+## 2026-09-30 — TASK-017 focused row Enter repair
+- Owner confirms search returns TEST-017-01 and zero/negative receipts are blocked before submission; saved search and zero validation screenshots.
+- Owner found Enter on focused account row did nothing. Added guarded Enter navigation to account detail, only when the row itself has focus, preserving child link actions. Embedded typecheck and five UX checks passed; owner keyboard retest pending.
+
+## 2026-09-30 — TASK-017 completed
+- Owner confirms Enter now opens the focused account row. Recorded all owner browser acceptance outcomes and screenshots in docs/evidence/browser-walkthrough-2026-09-30.md.
+- Marked TASK-017 Completed in tracker and matching architecture plan row after verified account/policy persistence, stale-write rejection, search, invalid receipt validation, durable financial/onboarding walkthrough and keyboard navigation.
+- TASK-019 remains open for actual provider sandbox send/callback; TASK-042 remains open for full owner-demo reconciliation. Next: finish TASK-042 evidence and remaining demo scenarios.
+
+## 2026-09-30 — TASK-042 completed
+- Re-ran pnpm test:e2e: complete fresh-directory lifecycle passed, including partial receipt, overpayment, reversal, aging, PDF bytes/hash, one locally captured email, tenant isolation and restart persistence.
+- Reconciled signed-in screenshots and owner confirmations with the existing R4300 browser branch. Fresh-directory guide still expects R1700 credit after its different action sequence; differences are explicitly documented.
+- Added TRADE_DEMO_DATA_DIR selection for an isolated fresh demonstration while retaining existing financial records. Corrected standalone PGlite seeding order and obsolete browser/Prisma blockers; fixed guide banner instructions.
+- Embedded typecheck and launcher syntax check passed. Marked TASK-042 Completed in tracker and corresponding plan row; TASK-019 remains open for actual provider sandbox acceptance. Requested owner provider preference; no email sent or service subscribed.
+
+## 2026-09-30 — TASK-003/004/011 continuation and TASK-019 deferral
+
+Recorded the owner's provider-selection deferral in tracking and the original plan. Added api-capabilities.md with the official 2026-07 partial-payment Plus restriction and pending device/order experiment matrix. Added source-cascade.test.ts: literal Delphi signed-credit cascade versus the proof harness, AGE fixtures, 512 generated comparisons and conservation checks. Recomputed all seven source hashes successfully. Separated 27 source-derived fixtures from 17 proposed-policy fixtures and documented legacy reconstruction/cash-office interpretation. Validation: 49 rule-proof tests and 9 money/terms tests passed. TASK-003/004/011 remain in progress; next steps are installed-scope/store experiments and dated independent policy review. No remote financial mutation or email was sent.
+
+## 2026-09-30 — DisplayDeck Trade Suite branding
+
+Applied owner-requested branding to the app heading, local Shopify name configuration, onboarding copy, prototype heading, API documentation, README, expansion plan and tracker. Removed legacy-server terminology from embedded onboarding. Shopify hosted display-name synchronization remains pending; linked app IDs and source evidence retain their identities. Next testing: installed scopes and synthetic Shopify account orders, then physical POS and reconciliation; email remains deferred.
+
+## 2026-09-30 — TASK-003 actual Shopify capability probe
+
+Added schema-validated read-only capabilities.graphql and check-shopify-capabilities.mjs. Actual installation reports Basic development store, not Plus, with zero granted scopes. Six requested permissions require installation update before account-order tests. Owner screenshots confirm DisplayDeck Trade Suite branding and active version displaydeck-trade-suite-2. No Shopify order mutation executed.
+
+## 2026-09-30 — Git checkpoint
+
+Prepared the accumulated implementation, branding, acceptance evidence and capability probe for commit to main and push to origin (JapieBosman/ShopifyStore). Excluded newly generated statement artifacts and local teamwork notes. Staged text credential scan found no literal Shopify tokens or private keys; no new tests were run for this Git-only checkpoint. Existing verification results remain recorded in prior entries.

@@ -17,7 +17,7 @@ ALTER TABLE api_idempotency FORCE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
   CREATE POLICY tenant_isolation ON api_idempotency
-    FOR ALL USING (tenant_id = current_setting('app.current_tenant_id', true)::uuid);
+    FOR ALL USING (tenant_id = coalesce(nullif(current_setting('app.tenant_id', true), ''), nullif(current_setting('app.current_tenant_id', true), ''))::uuid);
 EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;

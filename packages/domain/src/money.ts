@@ -115,6 +115,9 @@ export function requirePositive(value: string, label: string): bigint {
 }
 
 export function quantizeMoney(units: bigint, minorDigits: MinorDigits): bigint {
+  if (minorDigits !== 0 && minorDigits !== 2 && minorDigits !== 3) {
+    throw new RangeError("Currency precision must be 0, 2 or 3 decimal places");
+  }
   const quantum = 10n ** BigInt(Number(SCALE) - minorDigits);
   const magnitude = units < 0n ? -units : units;
   const rounded = ((magnitude + quantum / 2n) / quantum) * quantum;

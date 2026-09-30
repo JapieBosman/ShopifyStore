@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs, HeadersFunction, LoaderFunctionArgs } from "react-router";
 import { Form, Link, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { parseMoney, formatDisplayCurrency } from "../../../../../packages/domain/src/money.ts";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import {
@@ -14,9 +15,8 @@ import {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
   const url = new URL(request.url);
-  const accountId = url.searchParams.get("accountId") || "acc-001";
-
   const allAccounts = await getDebtorsList(undefined, undefined, request);
+  const accountId = url.searchParams.get("accountId") || allAccounts[0]?.id || "";
   const selectedDetails = await getDebtorDetails(accountId, request);
   const isDemo = isDemoMode();
 
@@ -25,6 +25,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     selectedAccountId: accountId,
     details: selectedDetails,
     isDemoMode: isDemo,
+    receiptIdempotencyKey: crypto.randomUUID(),
   };
 };
 
@@ -65,6 +66,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           reference,
           mode,
           explicitAllocations: mode === "explicit" ? explicitAllocations : undefined,
+          idempotencyKey: formData.get("receiptIdempotencyKey")?.toString(),
         },
         request
       );
@@ -101,7 +103,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
       return {
         success: true,
-        message: `${modePrefix} Reversed allocation ${result.reversedAllocationId}. Restored ${result.restoredAmount} to balance. ${modeSuffix}`,
+        message: `${modePrefix} Reversed allocation ${result.reversedAllocationId}. Reopened ${result.restoredAmount} on the invoice and restored the same unapplied credit; net balance is unchanged. ${modeSuffix}`,
       };
     } catch (err: any) {
       return { error: err.message || "Failed to reverse allocation" };
@@ -112,7 +114,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function AllocationsWorkbench() {
-  const { accounts, selectedAccountId, details, isDemoMode: isDemo } = useLoaderData<typeof loader>();
+  const { accounts, selectedAccountId, details, isDemoMode: isDemo, receiptIdempotencyKey } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
@@ -121,6 +123,10 @@ export default function AllocationsWorkbench() {
   const [allocationMode, setAllocationMode] = useState<"oldest_first" | "explicit">("oldest_first");
   const [explicitAmounts, setExplicitAmounts] = useState<Record<string, string>>({});
   const [selectedInvoices, setSelectedInvoices] = useState<Record<string, boolean>>({});
+  const [receiptKey, setReceiptKey] = useState(receiptIdempotencyKey);
+  useEffect(() => {
+    if (actionData && "success" in actionData && actionData.success) setReceiptKey(receiptIdempotencyKey);
+  }, [actionData, receiptIdempotencyKey]);
 
   const account = details?.account;
   const balances = details?.balances;
@@ -252,7 +258,7 @@ export default function AllocationsWorkbench() {
             <div style={{ display: "flex", gap: "20px", background: "var(--p-color-bg-surface-secondary)", padding: "10px 18px", borderRadius: "6px" }}>
               <div>
                 <div style={{ fontSize: "11px", color: "var(--p-color-text-secondary)", textTransform: "uppercase" }}>Open Debits</div>
-                <div style={{ fontSize: "16px", fontWeight: 700 }}>{account.currency} {balances.totalDebits}</div>
+                <div style={{ fontSize: "16px", fontWeight: 700 }}>{account.currency} {formatDisplayCurrency(openInvoices.reduce((sum, invoice) => sum + parseMoney(invoice.remainingAmount), 0n), account.currency)}</div>
               </div>
               <div>
                 <div style={{ fontSize: "11px", color: "var(--p-color-text-secondary)", textTransform: "uppercase" }}>Unapplied Credits</div>
@@ -270,6 +276,7 @@ export default function AllocationsWorkbench() {
       {account && (
         <Form method="post">
           <input type="hidden" name="intent" value="allocate" />
+          <input type="hidden" name="receiptIdempotencyKey" value={receiptKey} />
           <input type="hidden" name="debtorAccountId" value={account.id} />
           <input type="hidden" name="currency" value={account.currency} />
 

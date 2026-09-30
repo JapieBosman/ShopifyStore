@@ -115,10 +115,10 @@ export class BackgroundWorker {
   }
 }
 
-export function buildWorker(): BackgroundWorker {
+export function buildWorker(db?: any): BackgroundWorker {
   const worker = new BackgroundWorker();
 
-  // Stub handlers representing core queues from docs/03-architecture.md
+  // Core queues from docs/03-architecture.md
   worker.registerHandler("webhook_inbox_process", async (_job) => {
     // Will claim verified webhook payloads and invoke corresponding domain workflows
   });
@@ -133,6 +133,32 @@ export function buildWorker(): BackgroundWorker {
 
   worker.registerHandler("shift_reconcile", async (_job) => {
     // Will audit cash-office shift end totals against register transactions
+  });
+
+  // TASK-041: Scheduled statement delivery dispatch with leases
+  worker.registerHandler("statement_delivery_dispatch", async (job) => {
+    if (!db) {
+      throw new Error("Cannot execute statement_delivery_dispatch without DbClient");
+    }
+    const tenantId = job.payload.tenantId as string;
+    if (!tenantId) {
+      throw new Error("Missing tenantId in statement_delivery_dispatch job payload");
+    }
+    const { processQueuedDeliveries } = await import("./delivery.ts");
+    await processQueuedDeliveries(db, tenantId, job.payload as any);
+  });
+
+  // TASK-041: Scheduled statement delivery reconciliation with leases
+  worker.registerHandler("statement_delivery_reconcile", async (job) => {
+    if (!db) {
+      throw new Error("Cannot execute statement_delivery_reconcile without DbClient");
+    }
+    const tenantId = job.payload.tenantId as string;
+    if (!tenantId) {
+      throw new Error("Missing tenantId in statement_delivery_reconcile job payload");
+    }
+    const { reconcileUncertainDeliveries } = await import("./delivery.ts");
+    await reconcileUncertainDeliveries(db, tenantId, job.payload as any);
   });
 
   return worker;

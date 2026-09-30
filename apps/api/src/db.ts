@@ -11,8 +11,20 @@ const __dirname = dirname(__filename);
 export const DEFAULT_TENANT_ID = process.env.TEST_TENANT_ID || "33333333-3333-4333-8333-333333333333";
 export const DEFAULT_SHOP = process.env.SHOPIFY_SHOP_DOMAIN || "displaydeck.myshopify.com";
 
-class PgPoolDbClient implements DbClient {
-  constructor(private pool: pg.Pool) {}
+export class PgPoolDbClient implements DbClient {
+  private pool: pg.Pool;
+
+  constructor(pool: pg.Pool) {
+    this.pool = pool;
+  }
+
+  getPool(): pg.Pool {
+    return this.pool;
+  }
+
+  async close(): Promise<void> {
+    await this.pool.end();
+  }
 
   async query<R = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: R[] }> {
     const res = await this.pool.query(sql, params as any[]);
@@ -41,16 +53,25 @@ class PgPoolDbClient implements DbClient {
   }
 }
 
+export interface InitApiDatabaseOptions {
+  dataDir?: string;
+  databaseUrl?: string;
+  poolConfig?: pg.PoolConfig;
+  seedDemo?: boolean;
+}
+
 /**
- * Initializes a PostgreSQL client (via real PostgreSQL connection or PGlite fallback),
+ * Initializes a PostgreSQL client (via real PostgreSQL connection pool or PGlite fallback),
  * applies database migrations, and conditionally seeds development fixtures.
  */
-export async function initApiDatabase(options: { dataDir?: string; databaseUrl?: string } = {}): Promise<DbClient> {
+export async function initApiDatabase(options: InitApiDatabaseOptions = {}): Promise<DbClient> {
   const databaseUrl = options.databaseUrl || process.env.DATABASE_URL;
   let db: DbClient;
 
-  if (databaseUrl) {
-    const pool = new pg.Pool({ connectionString: databaseUrl });
+  if (databaseUrl || options.poolConfig) {
+    const pool = options.poolConfig
+      ? new pg.Pool(options.poolConfig)
+      : new pg.Pool({ connectionString: databaseUrl });
     db = new PgPoolDbClient(pool);
   } else {
     const dbPath = options.dataDir || process.env.PG_DATA_DIR || undefined;
@@ -64,17 +85,53 @@ export async function initApiDatabase(options: { dataDir?: string; databaseUrl?:
     "0003_allocation.sql",
     "0004_reservations.sql",
     "0005_idempotency.sql",
+    "0006_onboarding.sql",
   ];
 
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version text PRIMARY KEY,
+      applied_at timestamptz NOT NULL DEFAULT now()
+    );
+  `);
+
+  const existingTableCheck = await db.query<{ exists: boolean }>(`
+    SELECT EXISTS (
+      SELECT FROM information_schema.tables
+      WHERE table_schema = 'public'
+      AND table_name = 'tenant'
+    );
+  `);
+  if (existingTableCheck.rows[0]?.exists) {
+    for (const migration of migrations.slice(0, 5)) {
+      await db.query(
+        "INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT (version) DO NOTHING",
+        [migration],
+      );
+    }
+  }
+
   for (const migration of migrations) {
-    const sql = readFileSync(resolve(migrationsDir, migration), "utf8");
-    await db.exec(sql);
+    const check = await db.query<{ version: string }>(
+      "SELECT version FROM schema_migrations WHERE version = $1",
+      [migration],
+    );
+    if (check.rows.length === 0) {
+      const sql = readFileSync(resolve(migrationsDir, migration), "utf8");
+      await db.exec(sql);
+      await db.query(
+        "INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT (version) DO NOTHING",
+        [migration],
+      );
+    }
   }
 
   const shouldSeedDemo =
-    process.env.SEED_DEMO_DATA === "true" ||
-    process.env.NODE_ENV === "test" ||
-    (!databaseUrl && process.env.NODE_ENV !== "production");
+    options.seedDemo !== false &&
+    (options.seedDemo === true ||
+      process.env.SEED_DEMO_DATA === "true" ||
+      process.env.NODE_ENV === "test" ||
+      (!databaseUrl && process.env.NODE_ENV !== "production"));
 
   if (!shouldSeedDemo) {
     return db;
@@ -120,7 +177,7 @@ export async function initApiDatabase(options: { dataDir?: string; databaseUrl?:
     await db.query(
       `INSERT INTO debtor_account (
          id, tenant_id, account_number, legal_name, currency, payment_term_id, credit_limit, status, aging_basis
-       ) VALUES 
+       ) VALUES
          ('11111111-1111-4111-8111-111111111111', $1, 'ACC-001', 'Ubuntu Hardware Trade', 'ZAR', $2, 25000.0000, 'active', 'due_date'),
          ('22222222-2222-4222-8222-222222222222', $1, 'ACC-002', 'Cape Coastal Marine', 'ZAR', $2, 15000.0000, 'active', 'due_date')`,
       [DEFAULT_TENANT_ID, termRes.rows[0]!.id],
@@ -128,7 +185,7 @@ export async function initApiDatabase(options: { dataDir?: string; databaseUrl?:
 
     // Seed actors
     await db.query(
-      `INSERT INTO actor (tenant_id, external_subject, display_name, role) VALUES 
+      `INSERT INTO actor (tenant_id, external_subject, display_name, role) VALUES
          ($1, 'gid://shopify/User/1', 'Owner Admin', 'owner'),
          ($1, 'gid://shopify/User/10', 'Megan Manager', 'manager'),
          ($1, 'gid://shopify/User/20', 'Brian Bookkeeper', 'bookkeeper'),

@@ -169,12 +169,20 @@ export async function processQueuedDeliveries(
       `SELECT d.id, d.statement_id, d.recipient_secret_ref, d.idempotency_key, d.attempt_count,
               a.id as debtor_account_id, a.account_number, a.legal_name, s.closing_balance, s.currency,
               s.pdf_object_key, r.period_to,
-              bc.email as billing_contact_email
+              (
+                SELECT bc.email
+                FROM billing_contact bc
+                WHERE bc.tenant_id = d.tenant_id
+                  AND bc.debtor_account_id = a.id
+                  AND bc.send_statements = true
+                  AND bc.email IS NOT NULL
+                ORDER BY bc.created_at ASC
+                LIMIT 1
+              ) as billing_contact_email
        FROM statement_delivery d
        JOIN statement s ON s.id = d.statement_id AND s.tenant_id = d.tenant_id
        JOIN statement_run r ON r.id = s.statement_run_id AND r.tenant_id = d.tenant_id
        JOIN debtor_account a ON a.id = s.debtor_account_id AND a.tenant_id = d.tenant_id
-       LEFT JOIN billing_contact bc ON bc.tenant_id = d.tenant_id AND bc.debtor_account_id = a.id AND bc.send_statements = true
        WHERE d.tenant_id = $1
          AND d.status = 'queued'
          AND d.attempt_count < $2
@@ -189,13 +197,14 @@ export async function processQueuedDeliveries(
     }
 
     const ids = pendingRes.rows.map((r) => r.id);
+    const placeholders = ids.map((_, i) => `$${i + 2}`).join(", ");
     await tx.query(
       `UPDATE statement_delivery
        SET status = 'sending',
            attempt_count = attempt_count + 1,
            last_attempt_at = now()
-       WHERE tenant_id = $1 AND id = ANY($2::uuid[])`,
-      [tenantId, ids],
+       WHERE tenant_id = $1 AND id IN (${placeholders})`,
+      [tenantId, ...ids],
     );
 
     return pendingRes.rows;
@@ -496,11 +505,13 @@ export async function reconcileUncertainDeliveries(
       if (emailProvider.queryDeliveryStatus) {
         try {
           providerStatus = await emailProvider.queryDeliveryStatus({
+            tenantId,
             providerMessageId: row.provider_message_id,
             idempotencyKey: row.idempotency_key,
+            timeoutMs: 5000,
           });
-        } catch {
-          providerStatus = null;
+        } catch (err) {
+          providerStatus = { status: "unknown", reason: (err as Error).message || "Provider lookup failed" };
         }
       }
 
@@ -562,7 +573,7 @@ export async function reconcileUncertainDeliveries(
         }
       }
 
-      // Only an explicit provider result proves a send did not occur.
+      // Only an explicit authoritative not_found proves a send did not occur.
       if (providerStatus?.status === "not_found" && row.attempt_count < maxAttempts) {
         await tx.query(
           `UPDATE statement_delivery
@@ -598,10 +609,10 @@ export async function reconcileUncertainDeliveries(
           error: "Provider confirmed no message was received; retry limit reached",
         });
       } else {
+        // Unknown, unavailable, or ambiguous provider response: NEVER authorise retry!
         await tx.query(
           `UPDATE statement_delivery
            SET status = 'uncertain',
-               attempt_count = attempt_count + 1,
                last_attempt_at = now()
            WHERE tenant_id = $1 AND id = $2`,
           [tenantId, row.id],
@@ -612,7 +623,7 @@ export async function reconcileUncertainDeliveries(
           statementId: row.statement_id,
           status: "uncertain",
           action: "unresolved",
-          error: "Provider status remains unverified; not re-sent",
+          error: (providerStatus as any)?.reason || "Provider status remains unverified; not re-sent",
         });
       }
     }

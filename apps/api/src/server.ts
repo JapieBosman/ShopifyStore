@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import type { DbClient } from "../../../packages/database/tenant-context.ts";
 import { verifyShopifyWebhook } from "./shopify-webhook.ts";
 import { accountsRoutes } from "./routes/accounts.ts";
+import { onboardingRoutes } from "./routes/onboarding.ts";
 import { paymentsRoutes } from "./routes/payments.ts";
 import { allocationsRoutes } from "./routes/allocations.ts";
 import { statementsRoutes } from "./routes/statements.ts";
@@ -60,6 +61,7 @@ export function buildServer(options: ServerOptions = {}): FastifyInstance {
       idempotencyStore,
     };
     server.register(accountsRoutes, routeOpts);
+    server.register(onboardingRoutes, routeOpts);
     server.register(paymentsRoutes, routeOpts);
     server.register(allocationsRoutes, routeOpts);
     server.register(statementsRoutes, routeOpts);

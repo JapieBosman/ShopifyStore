@@ -165,7 +165,7 @@ test("payment terms due date calculation across Net, COD, and EOM", () => {
   assert.equal(calculateDueDate("2024-01-15", eom30), "2024-03-01");
 });
 
-test("due-date aging buckets match all Genesis parity test fixtures (DUE-001..DUE-010)", () => {
+test("due-date aging buckets match the new product policy fixtures (DUE-001..DUE-010)", () => {
   // DUE-001: Due in future -> current
   assert.equal(bucketForDueDate("2026-02-28", "2026-02-01"), "current");
 
@@ -195,6 +195,24 @@ test("due-date aging buckets match all Genesis parity test fixtures (DUE-001..DU
 
   // DUE-010: 2024 leap year boundary (Feb 29 -> March 01 = 1 day overdue) -> d030
   assert.equal(bucketForDueDate("2024-02-29", "2024-03-01"), "d030");
+});
+
+test("date boundaries reject invalid COD dates and fractional or unbounded terms", () => {
+  assert.throws(() => calculateDueDate("2026-02-30", { code: "COD", kind: "cod", days: 0 }), RangeError);
+  for (const days of [0.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.throws(() => calculateDueDate("2026-01-01", { code: "NET", kind: "net_days", days }), RangeError);
+    assert.throws(() => addDays("2026-01-01", days), RangeError);
+  }
+  assert.equal(addDays("0099-12-31", 1), "0100-01-01");
+  assert.equal(addDays("0001-01-01", 1), "0001-01-02");
+  assert.throws(() => parseIsoDate("0000-01-01"), RangeError);
+  assert.throws(() => addDays("9999-12-31", 1), RangeError);
+  assert.throws(() => addDays("0001-01-01", -1), RangeError);
+});
+
+test("runtime currency precision rejects unsupported values", () => {
+  assert.throws(() => quantizeMoney(12345n, 1 as never), RangeError);
+  assert.throws(() => quantizeMoney(12345n, NaN as never), RangeError);
 });
 
 test("versioned aging basis supports both due-date and calendar-period profiles", () => {

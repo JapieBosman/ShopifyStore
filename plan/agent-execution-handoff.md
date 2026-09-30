@@ -1,15 +1,15 @@
-# Agent execution handoff — Genesis Trade Suite
+# Agent execution handoff — DisplayDeck Trade Suite
 
-Updated 2026-09-29. [tracking.json](tracking.json) is the only task-status authority. The [original plan](architecture-shopify-trade-accounts-1.md) defines TASK-001–038; the [suite expansion plan](feature-trade-suite-expansion-1.md) defines TASK-039–063. New tasks are planned, not implemented.
+Updated 2026-09-30. [tracking.json](tracking.json) is the only task-status authority. The [original plan](architecture-shopify-trade-accounts-1.md) defines TASK-001–038; the [suite expansion plan](feature-trade-suite-expansion-1.md) defines TASK-039–063.
 
 ## Current starting point
 
 - The installed development app is Genesis Trade Suite on `displaydeck.myshopify.com`; installed embedded routes live in `apps/shopify/genesis-trade-suite`.
-- Foundation and multiple financial modules are recorded complete in the tracker. TASK-004/011 formula work and TASK-017/019 embedded UX/delivery remain In progress. This is tracker state, not independent recertification of all code.
+- TASK-017 and TASK-042 completed on 2026-09-30 with signed-in durable browser/owner acceptance and repeatable synthetic lifecycle proof. TASK-003 platform/device, TASK-004/011 finance and TASK-019 actual email-provider acceptance remain open.
 - Recent local delivery changes distinguish explicit provider absence from an unavailable lookup. External-provider, real PostgreSQL concurrency and physical POS evidence must be inspected before claiming live readiness.
 - There are no pilot merchants. Synthetic tests and dev stores support engineering; they do not establish demand, willingness to pay or public-release readiness.
 - The original 2026-09-28 screenshot proves the initial embedded demo rendered. It does not prove current order/payment/stock/device workflows.
-- Owner screenshots dated 2026-09-29 now show Trade Accounts, Allocation Workbench and Onboarding rendering in the DisplayDeck embedded app. See `docs/evidence/development-store.md`. The workbench is explicitly in-memory demo mode; no receipt submission or durable posting has been observed yet.
+- Current screenshots and owner confirmations are recorded in `docs/evidence/browser-walkthrough-2026-09-30.md`. A synthetic receipt and reversal persisted, onboarding survived restart, the owner verified account/policy/search/keyboard behavior, and PDF download works. Fresh-directory lifecycle and the existing R4300 browser branch are distinguished in `docs/evidence/synthetic-demo.md`.
 - TASK-039 reconciles historical evidence and inconsistent dependency completion. Do not restart completed foundation work solely because an older summary suggested it.
 
 ## Canonical paths and commands
@@ -34,8 +34,7 @@ Follow [LOCAL-TESTING.md](../docs/LOCAL-TESTING.md) for setup. TASK-040 must bri
 1. **TASK-039 — evidence audit.** Compare original completion claims to acceptance, missing dependencies and actual evidence. Correct unsupported states only with a recorded reason.
 2. **TASK-040 — durable runtime proof.** Test real PostgreSQL restricted roles, pooled transaction ownership, concurrent tenants, failure cleanup and restart persistence. Record reproducible start commands.
 3. **TASK-041 — delivery runtime.** Prove actual scheduled dispatch/reconciliation against a local HTTP gateway with a durable message log. Test crashes, unavailable status lookups, duplicate billing contacts and slow active batches; unknown status must never authorise resend. This does not itself close live-provider acceptance under TASK-019.
-4. **Finish TASK-017/019 and TASK-042 — owner demo.** Produce a repeatable embedded account/receipt/allocation/statement walkthrough. Real email provider acceptance, Shopify orders and POS-device outcomes remain separate evidence; the synthetic demo can use a local gateway.
-   The next browser acceptance step is one synthetic ACC-002 receipt/allocation, balance refresh and reversal, followed by onboarding steps 2–4 and an account detail view. Do not present the current screenshot of a proposed allocation as proof it was posted.
+4. **Continue TASK-019 — actual provider acceptance.** TASK-017/042 are complete. Select the owner's email provider, implement/configure its sandbox adapter and authenticate callbacks, then prove send, bounce and uncertain-result handling. Local captured-email proof is recorded; actual provider acceptance remains separate from it and from Shopify orders/POS-device results.
 5. **In parallel where files do not overlap:** continue TASK-003 platform/device feasibility and TASK-004/011 finance/formula review. Then implement TASK-020–023 using the proven platform path.
 6. **First feature additions:** module registry TASK-043, collections TASK-044, quote capability TASK-045, buyer/project controls TASK-047, exports TASK-051 and reports TASK-054 after their listed dependencies.
 7. **Later modules:** portal, accounting connector, returns, stock, purchasing and dispatch follow their capability tasks. Cash office/pricing/workshop use existing TASK-030–038 with the revised local versus release gates.
@@ -75,3 +74,11 @@ After that audit, assign TASK-040, then TASK-041. For another package, substitut
 ## Source-first priority update — 2026-09-29
 
 Read [architecture-genesis-advantage-1.md](architecture-genesis-advantage-1.md) before choosing additional features. TASK-064–070 trace genTIL, genCOF, genDEB, genREP, genPOS, genSTK and genCRD; TASK-071 selects competitively justified workflow packages. All 71 tasks are tracked centrally. Runtime work continues independently; the broad expansion list is a candidate backlog. Label each feature Genesis-derived, adapted or new, with its actual evidence level.
+
+## Owner email deferral — 2026-09-30
+
+TASK-019 is Deferred at the owner's explicit request until an email provider is selected. Continue TASK-003 and TASK-004/011 technical work. PDF download acceptance remains recorded; actual provider delivery is unverified. Platform matrix: docs/evidence/api-capabilities.md. Formula proof now has 49 passing tests plus 9 money/terms tests; independent financial approval remains pending.
+
+## Product rename — 2026-09-30
+
+The owner selected DisplayDeck Trade Suite. Local app heading, Shopify configuration, onboarding, current product documentation and tracker use this name. The installed Shopify label has not been verified or updated remotely. Existing directory and app URL identifiers remain the linked development app identifiers. Genesis references in financial provenance and historical evidence describe the original source and observations.

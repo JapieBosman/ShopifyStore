@@ -1,4 +1,4 @@
-# Genesis Trade Accounts for Shopify
+# DisplayDeck Trade Suite for Shopify
 Design and implementation workspace • started 2026-09-28 • live Shopify and commercial validation remain gated.
 
 **Recommendation: fund a two-week validation and technical proof, then conditionally build a debtor-control app for Shopify POS. Do not commit to a general replacement POS or promise a public Windows till.** There is a plausible specialist business, but direct competitors already exist and the original brief contains outdated assumptions.
@@ -26,5 +26,5 @@ This workspace includes a dependency-free TypeScript [rule proof](spikes/rule-pr
 The source brief is preserved in [original-mission.txt](original-mission.txt). Research links are attached to claims in the documents; public information was checked on 2026-09-26. Prices are USD hypotheses unless explicitly attributed to a vendor.
 
 ## Decision
-Build **Genesis for Shopify** as one installed suite with one subscription. Account control, allocation, aged debt, statements, audited counter approval and reconciliation are the first release. Cash office, price grids and workshop join the same subscription as each is proven and shipped. A browser counter remains conditional on Shopify distribution permission and demonstrated merchant need.
+Build **DisplayDeck Trade Suite** as one installed suite with one subscription. Account control, allocation, aged debt, statements, audited counter approval and reconciliation are the first release. Cash office, price grids and workshop join the same subscription as each is proven and shipped. A browser counter remains conditional on Shopify distribution permission and demonstrated merchant need.
 

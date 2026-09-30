@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import http from "node:http";
+import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -9,6 +11,7 @@ import { buildServer } from "../../apps/api/src/server.ts";
 import { createMockSessionToken } from "../../apps/api/src/auth/shopify.ts";
 import {
   MockStatementEmailProvider,
+  WebhookStatementEmailProvider,
   setStatementEmailProvider,
 } from "../../packages/domain/src/delivery.ts";
 import {
@@ -17,6 +20,7 @@ import {
   reconcileUncertainDeliveries,
   getStatementDeliveries,
 } from "../../apps/worker/src/delivery.ts";
+import { buildWorker } from "../../apps/worker/src/worker.ts";
 
 const migration0001 = fileURLToPath(
   new URL("../../packages/database/migrations/0001_core.sql", import.meta.url),
@@ -620,6 +624,427 @@ test("integration: statement delivery - preview, send, idempotency, deferred SMS
       (delivery) => delivery.id === unverifiedRecord.id,
     );
     assert.equal(unverifiedDelivery?.status, "uncertain");
+
+    // -------------------------------------------------------------
+    // TASK-041: Local HTTP Gateway, Failure Injection & Bounded Leases
+    // -------------------------------------------------------------
+
+    interface GatewayMessage {
+      tenantId: string;
+      idempotencyKey: string;
+      messageId: string;
+      payload: any;
+      receivedAt: number;
+      status: "accepted" | "delivered" | "bounced" | "failed";
+    }
+
+    class TestDeliveryGateway {
+      private server: http.Server | null = null;
+      public port: number = 0;
+      public url: string = "";
+
+      public readonly messageStore = new Map<string, GatewayMessage>();
+      public readonly acceptedLog: Array<{ tenantId: string; idempotencyKey: string; messageId: string }> = [];
+
+      public dropResponse = false;
+      public crashBeforeLog = false;
+      public gateway503 = false;
+      public lookup503 = false;
+      public lookupUnknown = false;
+      public delayedVisibilityMs = 0;
+      public artificialSendDelayMs = 0;
+
+      async start(): Promise<string> {
+        return new Promise((resolve) => {
+          this.server = http.createServer(async (req, res) => {
+            let body = "";
+            req.on("data", (chunk) => { body += chunk; });
+            req.on("end", async () => {
+              let parsedBody: any = null;
+              try { parsedBody = body ? JSON.parse(body) : null; } catch {}
+
+              const reqUrl = new URL(req.url || "", `http://127.0.0.1:${this.port}`);
+
+              // Status Query (GET)
+              if (req.method === "GET") {
+                const tenantId = reqUrl.searchParams.get("tenantId") || (req.headers["x-tenant-id"] as string);
+                const idempotencyKey = reqUrl.searchParams.get("idempotencyKey");
+
+                if (this.lookup503) {
+                  res.writeHead(503, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ error: "Gateway lookup service temporarily unavailable (503)" }));
+                  return;
+                }
+
+                if (this.lookupUnknown) {
+                  res.writeHead(200, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ status: "unknown", reason: "Provider lookup index currently unreachable" }));
+                  return;
+                }
+
+                const scopedKey = `${tenantId}:${idempotencyKey}`;
+                const found = this.messageStore.get(scopedKey);
+
+                if (found) {
+                  if (this.delayedVisibilityMs > 0 && Date.now() - found.receivedAt < this.delayedVisibilityMs) {
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ status: "unknown", reason: "Indexing in progress (delayed visibility)" }));
+                    return;
+                  }
+                  res.writeHead(200, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({
+                    status: found.status,
+                    messageId: found.messageId,
+                    providerTimestamp: new Date(found.receivedAt).toISOString(),
+                  }));
+                  return;
+                }
+
+                // Not found
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ status: "not_found", authoritative: true }));
+                return;
+              }
+
+              // Dispatch (POST)
+              if (req.method === "POST") {
+                if (this.artificialSendDelayMs > 0) {
+                  await new Promise((r) => setTimeout(r, this.artificialSendDelayMs));
+                }
+
+                if (this.crashBeforeLog) {
+                  req.socket.destroy();
+                  return;
+                }
+
+                if (this.gateway503) {
+                  res.writeHead(503, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ error: "Provider MTA transport failure (503)" }));
+                  return;
+                }
+
+                const tenantId = parsedBody?.tenantId || (req.headers["x-tenant-id"] as string);
+                const idempotencyKey = parsedBody?.idempotencyKey || (req.headers["idempotency-key"] as string);
+                const messageId = `gw_msg_${crypto.randomUUID()}`;
+
+                const scopedKey = `${tenantId}:${idempotencyKey}`;
+                this.messageStore.set(scopedKey, {
+                  tenantId,
+                  idempotencyKey,
+                  messageId,
+                  payload: parsedBody,
+                  receivedAt: Date.now(),
+                  status: "accepted",
+                });
+                this.acceptedLog.push({ tenantId, idempotencyKey, messageId });
+
+                if (this.dropResponse) {
+                  req.socket.destroy();
+                  return;
+                }
+
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({
+                  messageId,
+                  status: "accepted",
+                  providerTimestamp: new Date().toISOString(),
+                }));
+                return;
+              }
+
+              res.writeHead(405);
+              res.end();
+            });
+          });
+
+          this.server.listen(0, "127.0.0.1", () => {
+            const addr = this.server!.address() as any;
+            this.port = addr.port;
+            this.url = `http://127.0.0.1:${this.port}/v1/messages`;
+            resolve(this.url);
+          });
+        });
+      }
+
+      async stop(): Promise<void> {
+        return new Promise((resolve) => {
+          if (this.server) {
+            this.server.close(() => resolve());
+          } else {
+            resolve();
+          }
+        });
+      }
+
+      getAcceptanceCount(tenantId: string, idempotencyKey: string): number {
+        return this.acceptedLog.filter((l) => l.tenantId === tenantId && l.idempotencyKey === idempotencyKey).length;
+      }
+    }
+
+    const gateway = new TestDeliveryGateway();
+    await gateway.start();
+    const httpEmailProvider = new WebhookStatementEmailProvider(gateway.url);
+    setStatementEmailProvider(httpEmailProvider);
+
+    try {
+      // Clean previous mock-run records to guarantee pure gateway test isolation
+      await db.query("DELETE FROM statement_delivery WHERE tenant_id = $1", [TENANT_A_ID]);
+
+      // -------------------------------------------------------------
+      // Test 16: Crash-Before-Send with Local HTTP Gateway
+      // -------------------------------------------------------------
+      const gwCrashBeforeRecord = await enqueueStatementDelivery(db, TENANT_A_ID, {
+        statementId,
+        channel: "email",
+        recipientEmail: "gw.crash.before@premier.co.za",
+        idempotencyKey: "gw-crash-before-01",
+      });
+      await db.query(
+        `UPDATE statement_delivery
+         SET status = 'sending', attempt_count = 1, last_attempt_at = now() - interval '2 minutes'
+         WHERE tenant_id = $1 AND id = $2`,
+        [TENANT_A_ID, gwCrashBeforeRecord.id],
+      );
+
+      // Reconcile queries gateway: gateway returns 404 (authoritative not_found).
+      // Delivery safely requeues because gateway proves it never received it.
+      const gwBeforeRecon = await reconcileUncertainDeliveries(db, TENANT_A_ID, { staleSendingThresholdMs: 0 });
+      assert.equal(gwBeforeRecon.requeued, 1);
+
+      // Worker executes and dispatches cleanly
+      const gwBeforeWorker = await processQueuedDeliveries(db, TENANT_A_ID, { limit: 1 });
+      assert.equal(gwBeforeWorker.processed, 1);
+      assert.equal(gwBeforeWorker.succeeded, 1);
+
+      // Gateway received and accepted EXACTLY ONCE
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-crash-before-01"), 1);
+
+      // -------------------------------------------------------------
+      // Test 17: Crash-After-Send with Local HTTP Gateway (Lost Response)
+      // -------------------------------------------------------------
+      await db.query("DELETE FROM statement_delivery WHERE tenant_id = $1", [TENANT_A_ID]);
+      gateway.dropResponse = true;
+      const gwCrashAfterRecord = await enqueueStatementDelivery(db, TENANT_A_ID, {
+        statementId,
+        channel: "email",
+        recipientEmail: "gw.crash.after@premier.co.za",
+        idempotencyKey: "gw-crash-after-01",
+      });
+
+      // Worker catches connection drop and marks status as 'uncertain'
+      const gwAfterWorker1 = await processQueuedDeliveries(db, TENANT_A_ID, { limit: 1 });
+      assert.equal(gwAfterWorker1.uncertain, 1);
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-crash-after-01"), 1);
+
+      // Normal worker pass does NOT re-send uncertain records
+      const gwAfterWorker2 = await processQueuedDeliveries(db, TENANT_A_ID, { limit: 1 });
+      assert.equal(gwAfterWorker2.processed, 0);
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-crash-after-01"), 1);
+
+      // Reconcile queries gateway: gateway confirms receipt and marks accepted WITHOUT re-sending
+      gateway.dropResponse = false;
+      const gwAfterRecon = await reconcileUncertainDeliveries(db, TENANT_A_ID, { staleSendingThresholdMs: 0 });
+      assert.equal(gwAfterRecon.confirmedAccepted, 1);
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-crash-after-01"), 1, "Must produce at most ONE gateway acceptance");
+
+      const gwAfterDeliveries = await getStatementDeliveries(db, TENANT_A_ID, statementId);
+      const gwAfterSaved = gwAfterDeliveries.find((d) => d.id === gwCrashAfterRecord.id)!;
+      assert.equal(gwAfterSaved.status, "accepted");
+
+      // -------------------------------------------------------------
+      // Test 18: Unavailable Gateway Lookup (Unknown Never Authorises Retry)
+      // -------------------------------------------------------------
+      await db.query("DELETE FROM statement_delivery WHERE tenant_id = $1", [TENANT_A_ID]);
+      const gwUnavailRecord = await enqueueStatementDelivery(db, TENANT_A_ID, {
+        statementId,
+        channel: "email",
+        recipientEmail: "gw.unavail@premier.co.za",
+        idempotencyKey: "gw-unavail-01",
+      });
+      await db.query(
+        `UPDATE statement_delivery
+         SET status = 'uncertain', attempt_count = 1, last_attempt_at = now() - interval '2 minutes'
+         WHERE tenant_id = $1 AND id = $2`,
+        [TENANT_A_ID, gwUnavailRecord.id],
+      );
+
+      // Gateway lookup fails with 503
+      gateway.lookup503 = true;
+      const gwUnavailRecon1 = await reconcileUncertainDeliveries(db, TENANT_A_ID, { staleSendingThresholdMs: 0 });
+      assert.equal(gwUnavailRecon1.requeued, 0, "Unknown/503 provider status must NEVER authorise retry");
+      assert.equal(gwUnavailRecon1.stillUncertain, 1);
+
+      // Gateway lookup returns { status: 'unknown' }
+      gateway.lookup503 = false;
+      gateway.lookupUnknown = true;
+      const gwUnavailRecon2 = await reconcileUncertainDeliveries(db, TENANT_A_ID, { staleSendingThresholdMs: 0 });
+      assert.equal(gwUnavailRecon2.requeued, 0, "Explicit 'unknown' status must NEVER authorise retry");
+      assert.equal(gwUnavailRecon2.stillUncertain, 1);
+      gateway.lookupUnknown = false;
+
+      // Gateway acceptance count remains 0 (no blind resend occurred)
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-unavail-01"), 0);
+
+      // -------------------------------------------------------------
+      // Test 19: Delayed Visibility Resolution
+      // -------------------------------------------------------------
+      await db.query("DELETE FROM statement_delivery WHERE tenant_id = $1", [TENANT_A_ID]);
+      gateway.delayedVisibilityMs = 50;
+      const gwDelayedRecord = await enqueueStatementDelivery(db, TENANT_A_ID, {
+        statementId,
+        channel: "email",
+        recipientEmail: "gw.delayed@premier.co.za",
+        idempotencyKey: "gw-delayed-01",
+      });
+      // Simulate client connection reset during send, leaving record in uncertain
+      gateway.dropResponse = true;
+      await processQueuedDeliveries(db, TENANT_A_ID, { limit: 1 });
+      gateway.dropResponse = false;
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-delayed-01"), 1);
+
+      // Immediate reconciliation (< 50ms): gateway reports unknown due to delayed visibility
+      const delayedReconEarly = await reconcileUncertainDeliveries(db, TENANT_A_ID, { staleSendingThresholdMs: 0 });
+      assert.equal(delayedReconEarly.requeued, 0, "Delayed visibility must not authorise retry");
+      assert.equal(delayedReconEarly.stillUncertain, 1);
+
+      // Wait 60ms for indexing delay to elapse
+      await new Promise((r) => setTimeout(r, 60));
+
+      // Subsequent reconciliation: gateway index resolves and returns accepted
+      const delayedReconLate = await reconcileUncertainDeliveries(db, TENANT_A_ID, { staleSendingThresholdMs: 0 });
+      assert.equal(delayedReconLate.confirmedAccepted, 1);
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-delayed-01"), 1, "Must never dispatch duplicate email during visibility delay");
+      gateway.delayedVisibilityMs = 0;
+
+      // -------------------------------------------------------------
+      // Test 20: Multiple Billing Contacts (Zero Row Duplication)
+      // -------------------------------------------------------------
+      await db.query("DELETE FROM statement_delivery WHERE tenant_id = $1", [TENANT_A_ID]);
+      // Insert multiple billing contacts for debtor account
+      await db.query(
+        `INSERT INTO billing_contact (tenant_id, debtor_account_id, name, email, send_statements)
+         VALUES ($1, $2, 'Finance Team 1', 'team1@premier.co.za', true),
+                ($1, $2, 'Finance Team 2', 'team2@premier.co.za', true)`,
+        [TENANT_A_ID, debtorId],
+      );
+
+      // Enqueue 2 distinct deliveries for the same statement to different contacts
+      await enqueueStatementDelivery(db, TENANT_A_ID, {
+        statementId,
+        channel: "email",
+        recipientEmail: "team1@premier.co.za",
+        idempotencyKey: "gw-contact-01",
+      });
+      await enqueueStatementDelivery(db, TENANT_A_ID, {
+        statementId,
+        channel: "email",
+        recipientEmail: "team2@premier.co.za",
+        idempotencyKey: "gw-contact-02",
+      });
+
+      // Claim and process: scalar subquery ensures no Cartesian multiplication
+      const multiContactResult = await processQueuedDeliveries(db, TENANT_A_ID, { limit: 10 });
+      assert.equal(multiContactResult.processed, 2);
+      assert.equal(multiContactResult.succeeded, 2);
+
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-contact-01"), 1);
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-contact-02"), 1);
+
+      // -------------------------------------------------------------
+      // Test 21: Active Slow Batch Tests (At Most One Gateway Acceptance)
+      // -------------------------------------------------------------
+      await db.query("DELETE FROM statement_delivery WHERE tenant_id = $1", [TENANT_A_ID]);
+      gateway.artificialSendDelayMs = 25;
+
+      const batchKeys: string[] = [];
+      for (let i = 1; i <= 6; i++) {
+        const key = `slow-batch-${i}`;
+        batchKeys.push(key);
+        await enqueueStatementDelivery(db, TENANT_A_ID, {
+          statementId,
+          channel: "email",
+          recipientEmail: `batch${i}@premier.co.za`,
+          idempotencyKey: key,
+        });
+      }
+
+      // Start the active slow batch in flight
+      const slowBatchPromise = processQueuedDeliveries(db, TENANT_A_ID, { limit: 10 });
+
+      // Yield briefly to ensure atomic claim transaction commits and marks items 'sending'
+      await new Promise((r) => setTimeout(r, 10));
+
+      // 1. A subsequent worker pass while slow batch is active in-flight:
+      // Must see 0 queued items and must not re-claim the in-flight batch
+      const subsequentWorkerPass = await processQueuedDeliveries(db, TENANT_A_ID, { limit: 10 });
+      assert.equal(subsequentWorkerPass.processed, 0, "Subsequent worker pass must not re-claim active in-flight batch");
+
+      // 2. A reconciliation pass while slow batch is active within its lease window:
+      // Must not touch active non-stale 'sending' deliveries
+      const activeReconPass = await reconcileUncertainDeliveries(db, TENANT_A_ID, { staleSendingThresholdMs: 30000 });
+      assert.equal(activeReconPass.reconciled, 0, "Reconciliation must not interfere with active non-stale batch");
+
+      // Wait for slow batch to complete
+      const slowBatchResult = await slowBatchPromise;
+      assert.equal(slowBatchResult.processed, 6);
+      assert.equal(slowBatchResult.succeeded, 6);
+
+      // Verify each item produced at most ONE gateway acceptance
+      for (const key of batchKeys) {
+        assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, key), 1, `Batch key ${key} must have exactly 1 acceptance`);
+      }
+      gateway.artificialSendDelayMs = 0;
+
+      // -------------------------------------------------------------
+      // Test 22: BackgroundWorker Scheduled Jobs with Leases
+      // -------------------------------------------------------------
+      await db.query("DELETE FROM statement_delivery WHERE tenant_id = $1", [TENANT_A_ID]);
+      const worker = buildWorker(db);
+
+      await enqueueStatementDelivery(db, TENANT_A_ID, {
+        statementId,
+        channel: "email",
+        recipientEmail: "worker.job@premier.co.za",
+        idempotencyKey: "gw-worker-job-01",
+      });
+
+      // Valid lease executes dispatch
+      const validJob = {
+        id: "job-valid-1",
+        name: "statement_delivery_dispatch",
+        payload: { tenantId: TENANT_A_ID, limit: 10 },
+        leaseExpiresAt: Date.now() + 30000,
+      };
+      const validResult = await worker.processJob(validJob);
+      assert.equal(validResult.success, true);
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-worker-job-01"), 1);
+
+      // Expired lease is skipped by worker tick
+      await enqueueStatementDelivery(db, TENANT_A_ID, {
+        statementId,
+        channel: "email",
+        recipientEmail: "expired.job@premier.co.za",
+        idempotencyKey: "gw-worker-job-02",
+      });
+
+      const expiredJob = {
+        id: "job-expired-1",
+        name: "statement_delivery_dispatch",
+        payload: { tenantId: TENANT_A_ID, limit: 10 },
+        leaseExpiresAt: Date.now() - 5000, // Expired lease
+      };
+      await worker.tick([expiredJob]);
+
+      // Job was skipped, so delivery was not dispatched
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-worker-job-02"), 0);
+
+      // Re-running with valid lease executes it
+      expiredJob.leaseExpiresAt = Date.now() + 30000;
+      await worker.tick([expiredJob]);
+      assert.equal(gateway.getAcceptanceCount(TENANT_A_ID, "gw-worker-job-02"), 1);
+    } finally {
+      await gateway.stop();
+    }
   } finally {
     await db.close();
   }

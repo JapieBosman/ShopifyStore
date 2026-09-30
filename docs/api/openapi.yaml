@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Genesis Trade Suite API
+  title: DisplayDeck Trade Suite API
   version: 1.0.0
   description: >
-    Production REST API for Genesis Trade Suite, providing Shopify-native
+    Production REST API for DisplayDeck Trade Suite, providing Shopify-native
     trade accounts, real-time credit controls, double-entry AR ledger receipts,
     multi-document payment allocations, and eight-bucket aging analysis.
 servers:
@@ -16,6 +16,38 @@ security:
   - ShopifySessionToken: []
 
 paths:
+  /onboarding:
+    get:
+      summary: Read tenant onboarding preferences
+      description: Requires view_accounts. Returns saved preferences and the tenant ledger base currency.
+      responses:
+        '200':
+          description: Tenant preferences
+    patch:
+      summary: Save tenant onboarding preferences
+      description: Requires manage_policy. Atomically merges provided fields; omitted values remain unchanged. Ledger currency must match the tenant base currency.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operatingCurrency: { type: string }
+                agingBasis: { type: string, enum: [due_date, calendar_period] }
+                defaultCreditLimit: { type: string }
+                defaultTermsType: { type: string, enum: [net_monthly, eom, cod] }
+                defaultTermsDays: { type: integer, minimum: 0, maximum: 365 }
+                step: { type: integer, minimum: 1, maximum: 4 }
+                isCompleted: { type: boolean }
+      responses:
+        '200':
+          description: Merged tenant preferences
+        '400':
+          description: Invalid preferences or ledger currency mismatch
+        '403':
+          description: Actor cannot manage policy
   /accounts:
     get:
       summary: List debtor accounts
@@ -426,6 +458,66 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+
+  /statements/run:
+    post:
+      summary: Build an immutable statement run
+      description: Builds tenant statements from the current ledger snapshot and returns the selected account's statement ID. Requires the run_statements permission.
+      operationId: buildStatementRun
+      tags:
+        - Statements
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [debtorAccountId, periodFrom, periodTo]
+              properties:
+                debtorAccountId:
+                  type: string
+                  format: uuid
+                periodFrom:
+                  type: string
+                  format: date
+                periodTo:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Statement run and selected immutable statement created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [statementRunId, statementId, debtorAccountId, status]
+                properties:
+                  statementRunId:
+                    type: string
+                    format: uuid
+                  statementId:
+                    type: string
+                    format: uuid
+                  debtorAccountId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [building, ready, complete]
+                  statementsCount:
+                    type: integer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /allocations:
     post:

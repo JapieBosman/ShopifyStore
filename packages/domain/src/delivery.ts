@@ -167,15 +167,22 @@ export interface EmailDispatchResult {
   providerTimestamp?: string;
 }
 
-export type EmailLookupResult = EmailDispatchResult | { status: "not_found" };
+export type EmailLookupResult =
+  | EmailDispatchResult
+  | { status: "not_found"; authoritative?: boolean }
+  | { status: "unknown"; reason?: string };
+
+export interface QueryDeliveryStatusOptions {
+  tenantId?: string;
+  providerMessageId?: string | null;
+  idempotencyKey?: string;
+  timeoutMs?: number;
+}
 
 export interface StatementEmailProvider {
   readonly providerName: string;
   sendStatementEmail(payload: EmailDispatchPayload): Promise<EmailDispatchResult>;
-  queryDeliveryStatus?(options: {
-    providerMessageId?: string | null;
-    idempotencyKey?: string;
-  }): Promise<EmailLookupResult | null>;
+  queryDeliveryStatus?(options: QueryDeliveryStatusOptions): Promise<EmailLookupResult | null>;
 }
 
 /**
@@ -184,9 +191,13 @@ export interface StatementEmailProvider {
 export class MockStatementEmailProvider implements StatementEmailProvider {
   readonly providerName = "mock_email";
   public readonly sentEmails: EmailDispatchPayload[] = [];
-  private readonly messagesByIdempotencyKey = new Map<string, EmailDispatchResult>();
+  private readonly messagesByIdempotencyKey = new Map<string, EmailDispatchResult & { receivedAt: number }>();
+  private readonly messagesByScopedKey = new Map<string, EmailDispatchResult & { receivedAt: number }>();
   private simulateStatus: "accepted" | "delivered" | "bounced" | "failed" | "uncertain" = "accepted";
   private simulateError?: string;
+  private simulateLookupOutcome?: "accepted" | "delivered" | "bounced" | "failed" | "not_found" | "unknown" | null;
+  private simulateLookupReason?: string;
+  private delayedVisibilityMs = 0;
 
   setSimulatedOutcome(
     status: "accepted" | "delivered" | "bounced" | "failed" | "uncertain",
@@ -196,11 +207,27 @@ export class MockStatementEmailProvider implements StatementEmailProvider {
     this.simulateError = errorMessage;
   }
 
+  setSimulatedLookupOutcome(
+    outcome: "accepted" | "delivered" | "bounced" | "failed" | "not_found" | "unknown" | null,
+    reason?: string,
+  ): void {
+    this.simulateLookupOutcome = outcome;
+    this.simulateLookupReason = reason;
+  }
+
+  setDelayedVisibility(delayMs: number): void {
+    this.delayedVisibilityMs = delayMs;
+  }
+
   clearSent(): void {
     this.sentEmails.length = 0;
     this.messagesByIdempotencyKey.clear();
+    this.messagesByScopedKey.clear();
     this.simulateStatus = "accepted";
     this.simulateError = undefined;
+    this.simulateLookupOutcome = null;
+    this.simulateLookupReason = undefined;
+    this.delayedVisibilityMs = 0;
   }
 
   async sendStatementEmail(payload: EmailDispatchPayload): Promise<EmailDispatchResult> {
@@ -243,27 +270,62 @@ export class MockStatementEmailProvider implements StatementEmailProvider {
     }
 
     if (payload.idempotencyKey) {
-      this.messagesByIdempotencyKey.set(payload.idempotencyKey, {
+      const entry = {
         ...result,
+        receivedAt: Date.now(),
         // In reality, remote provider records the message even if the client experienced timeout
-        status: this.simulateStatus === "uncertain" ? "accepted" : result.status,
-      });
+        status: this.simulateStatus === "uncertain" ? ("accepted" as const) : result.status,
+      };
+      this.messagesByIdempotencyKey.set(payload.idempotencyKey, entry);
+      if (payload.tenantId) {
+        this.messagesByScopedKey.set(`${payload.tenantId}:${payload.idempotencyKey}`, entry);
+      }
     }
 
     return result;
   }
 
-  async queryDeliveryStatus(options: {
-    providerMessageId?: string | null;
-    idempotencyKey?: string;
-  }): Promise<EmailLookupResult | null> {
-    if (options.idempotencyKey && this.messagesByIdempotencyKey.has(options.idempotencyKey)) {
-      return this.messagesByIdempotencyKey.get(options.idempotencyKey)!;
+  async queryDeliveryStatus(options: QueryDeliveryStatusOptions): Promise<EmailLookupResult | null> {
+    if (this.simulateLookupOutcome === "unknown") {
+      return { status: "unknown", reason: this.simulateLookupReason || "Simulated provider gateway unknown status" };
     }
+    if (this.simulateLookupOutcome === "not_found") {
+      return { status: "not_found", authoritative: true };
+    }
+    if (this.simulateLookupOutcome && this.simulateLookupOutcome !== null) {
+      return {
+        providerMessageId: options.providerMessageId || `msg_sim_${crypto.randomUUID()}`,
+        status: this.simulateLookupOutcome,
+        providerTimestamp: new Date().toISOString(),
+      };
+    }
+
+    if (options.idempotencyKey) {
+      let found: (EmailDispatchResult & { receivedAt: number }) | undefined;
+      if (options.tenantId) {
+        found = this.messagesByScopedKey.get(`${options.tenantId}:${options.idempotencyKey}`);
+      }
+      if (!found) {
+        found = this.messagesByIdempotencyKey.get(options.idempotencyKey);
+      }
+
+      if (found) {
+        if (this.delayedVisibilityMs > 0 && Date.now() - found.receivedAt < this.delayedVisibilityMs) {
+          return { status: "unknown", reason: "Indexing in progress (delayed visibility)" };
+        }
+        return {
+          providerMessageId: found.providerMessageId,
+          status: found.status,
+          providerTimestamp: found.providerTimestamp,
+        };
+      }
+    }
+
     if (options.providerMessageId) {
       const match = this.sentEmails.find(
         (p) =>
-          options.idempotencyKey && p.idempotencyKey === options.idempotencyKey,
+          (!options.tenantId || p.tenantId === options.tenantId) &&
+          (!options.idempotencyKey || p.idempotencyKey === options.idempotencyKey),
       );
       if (match) {
         return {
@@ -273,7 +335,8 @@ export class MockStatementEmailProvider implements StatementEmailProvider {
         };
       }
     }
-    return { status: "not_found" };
+
+    return { status: "not_found", authoritative: true };
   }
 }
 
@@ -293,6 +356,8 @@ export class WebhookStatementEmailProvider implements StatementEmailProvider {
   async sendStatementEmail(payload: EmailDispatchPayload): Promise<EmailDispatchResult> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      "X-Tenant-Id": payload.tenantId,
+      "Idempotency-Key": payload.idempotencyKey || "",
     };
     if (this.authToken) {
       headers["Authorization"] = `Bearer ${this.authToken}`;
@@ -347,31 +412,65 @@ export class WebhookStatementEmailProvider implements StatementEmailProvider {
     }
   }
 
-  async queryDeliveryStatus(options: {
-    providerMessageId?: string | null;
-    idempotencyKey?: string;
-  }): Promise<EmailLookupResult | null> {
+  async queryDeliveryStatus(options: QueryDeliveryStatusOptions): Promise<EmailLookupResult | null> {
     if (!options.idempotencyKey && !options.providerMessageId) return null;
     const queryUrl = new URL(this.endpoint);
+    if (options.tenantId) queryUrl.searchParams.set("tenantId", options.tenantId);
     if (options.idempotencyKey) queryUrl.searchParams.set("idempotencyKey", options.idempotencyKey);
     if (options.providerMessageId) queryUrl.searchParams.set("messageId", options.providerMessageId);
 
     const headers: Record<string, string> = {};
     if (this.authToken) headers["Authorization"] = `Bearer ${this.authToken}`;
+    if (options.tenantId) headers["X-Tenant-Id"] = options.tenantId;
+
+    const timeoutMs = options.timeoutMs ?? 5000;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const res = await fetch(queryUrl.toString(), { method: "GET", headers });
-      if (!res.ok) return null;
-      const data = (await res.json()) as { status?: EmailLookupResult["status"]; messageId?: string };
-      if (data.status === "not_found") return { status: "not_found" };
-      if (!data.status || !["accepted", "delivered", "bounced", "failed", "uncertain"].includes(data.status)) {
+      const res = await fetch(queryUrl.toString(), {
+        method: "GET",
+        headers,
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          const body = (await res.json().catch(() => ({}))) as { status?: string; authoritative?: boolean };
+          return body.authoritative !== undefined
+            ? { status: "not_found", authoritative: body.authoritative }
+            : { status: "not_found" };
+        }
         return null;
       }
-      return {
-        providerMessageId: data.messageId || options.providerMessageId || "",
-        status: data.status,
+
+      const data = (await res.json().catch(() => ({}))) as {
+        status?: string;
+        messageId?: string;
+        reason?: string;
+        providerTimestamp?: string;
+        authoritative?: boolean;
       };
+
+      if (data.status === "not_found") {
+        return data.authoritative !== undefined
+          ? { status: "not_found", authoritative: data.authoritative }
+          : { status: "not_found" };
+      }
+      if (data.status === "unknown") {
+        return { status: "unknown", reason: data.reason || "Provider reported unknown status" };
+      }
+      if (["accepted", "delivered", "bounced", "failed"].includes(data.status as any)) {
+        return {
+          providerMessageId: data.messageId || options.providerMessageId || "",
+          status: data.status as any,
+          providerTimestamp: data.providerTimestamp || new Date().toISOString(),
+        };
+      }
+      return null;
     } catch {
+      clearTimeout(timeout);
       return null;
     }
   }

@@ -5,7 +5,7 @@ import path from "node:path";
 
 describe("TASK-017: Embedded UX Keyboard Accessibility & Contracts", () => {
   it("accounts directory component contains keyboard accessibility and ARIA landmarks", () => {
-    const routePath = path.resolve("apps/shopify/genesis-trade-suite/app/routes/app.accounts.tsx");
+    const routePath = path.resolve("apps/shopify/genesis-trade-suite/app/routes/app.accounts._index.tsx");
     const content = fs.readFileSync(routePath, "utf-8");
 
     // Check keyboard shortcut for search

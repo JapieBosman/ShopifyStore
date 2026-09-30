@@ -8,7 +8,9 @@
     "typecheck": "tsc --noEmit",
     "build": "pnpm typecheck && pnpm --filter @genesis-shopify/admin build && npm --prefix apps/shopify/genesis-trade-suite run build && pnpm exec shopify app build --path apps/shopify/genesis-trade-suite",
     "shopify:dev": "pnpm exec shopify app dev --path apps/shopify/genesis-trade-suite --store displaydeck.myshopify.com",
-    "shopify:typecheck": "npm --prefix apps/shopify/genesis-trade-suite run typecheck"
+    "shopify:typecheck": "npm --prefix apps/shopify/genesis-trade-suite run typecheck",
+    "seed:demo": "node --experimental-strip-types scripts/seed-synthetic-demo.ts",
+    "test:e2e": "node --test tests/e2e/*.spec.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

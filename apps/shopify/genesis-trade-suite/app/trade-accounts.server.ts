@@ -580,21 +580,29 @@ export async function getDebtorsList(search?: string, statusFilter?: string, req
             const detail = await apiRequest<{
               balance: DebtorBalanceSummary;
               credit: DebtorExposureSummary;
+              account: {
+                terms_type: DebtorAccountData["termsType"];
+                terms_days: number;
+                shopify_customer_id: string;
+                shopify_company_id: string | null;
+                contact_email: string;
+                contact_phone: string;
+              };
             }>(`/v1/accounts/${acc.id}`, { request });
             return {
               id: acc.id,
               accountNumber: acc.account_number,
               name: acc.legal_name,
-              shopifyCustomerId: "",
-              shopifyCompanyId: null,
+              shopifyCustomerId: detail.account.shopify_customer_id,
+              shopifyCompanyId: detail.account.shopify_company_id,
               currency: acc.currency,
               creditLimit: to2Decimals(parseMoney(acc.credit_limit)),
               status: acc.status,
-              termsType: "net_monthly" as const,
-              termsDays: 30,
+              termsType: detail.account.terms_type,
+              termsDays: detail.account.terms_days,
               agingBasis: acc.aging_basis || ("due_date" as const),
-              contactEmail: "",
-              contactPhone: "",
+              contactEmail: detail.account.contact_email,
+              contactPhone: detail.account.contact_phone,
               policyVersion: acc.policy_version,
               ledgerVersion: acc.ledger_version,
               createdAt: acc.created_at,
@@ -602,28 +610,8 @@ export async function getDebtorsList(search?: string, statusFilter?: string, req
               availableCredit: detail.credit?.availableCredit ? to2Decimals(parseMoney(detail.credit.availableCredit)) : to2Decimals(parseMoney(acc.credit_limit)),
               totalExposure: detail.credit?.totalExposure ? to2Decimals(parseMoney(detail.credit.totalExposure)) : "0.00",
             };
-          } catch {
-            return {
-              id: acc.id,
-              accountNumber: acc.account_number,
-              name: acc.legal_name,
-              shopifyCustomerId: "",
-              shopifyCompanyId: null,
-              currency: acc.currency,
-              creditLimit: to2Decimals(parseMoney(acc.credit_limit)),
-              status: acc.status,
-              termsType: "net_monthly" as const,
-              termsDays: 30,
-              agingBasis: acc.aging_basis || ("due_date" as const),
-              contactEmail: "",
-              contactPhone: "",
-              policyVersion: acc.policy_version,
-              ledgerVersion: acc.ledger_version,
-              createdAt: acc.created_at,
-              netBalance: "0.00",
-              availableCredit: to2Decimals(parseMoney(acc.credit_limit)),
-              totalExposure: "0.00",
-            };
+          } catch (error) {
+            throw new Error(`Unable to load balances for ${acc.account_number}`, { cause: error });
           }
         })
       );
@@ -666,6 +654,12 @@ export async function getDebtorDetails(id: string, request?: Request) {
           id: string;
           account_number: string;
           legal_name: string;
+          terms_type: DebtorAccountData["termsType"];
+          terms_days: number;
+          shopify_customer_id: string;
+          shopify_company_id: string | null;
+          contact_email: string;
+          contact_phone: string;
           trade_name?: string | null;
           currency: string;
           credit_limit: string;
@@ -752,16 +746,16 @@ export async function getDebtorDetails(id: string, request?: Request) {
         id: apiData.account.id,
         accountNumber: apiData.account.account_number,
         name: apiData.account.legal_name,
-        shopifyCustomerId: "",
-        shopifyCompanyId: null,
+        shopifyCustomerId: apiData.account.shopify_customer_id,
+        shopifyCompanyId: apiData.account.shopify_company_id,
         currency: apiData.account.currency,
         creditLimit: to2Decimals(parseMoney(apiData.account.credit_limit)),
         status: apiData.account.status,
-        termsType: "net_monthly",
-        termsDays: 30,
+        termsType: apiData.account.terms_type,
+        termsDays: apiData.account.terms_days,
         agingBasis: apiData.account.aging_basis || "due_date",
-        contactEmail: "",
-        contactPhone: "",
+        contactEmail: apiData.account.contact_email,
+        contactPhone: apiData.account.contact_phone,
         policyVersion: apiData.account.policy_version,
         ledgerVersion: apiData.account.ledger_version,
         createdAt: apiData.account.created_at,
@@ -917,6 +911,12 @@ export async function createDebtorAccount(data: {
       body: {
         accountNumber: data.accountNumber.trim().toUpperCase(),
         legalName: data.name.trim(),
+        termsType: data.termsType,
+        termsDays: data.termsDays,
+        shopifyCustomerId: data.shopifyCustomerId.trim(),
+        shopifyCompanyId: data.shopifyCompanyId?.trim() || null,
+        contactEmail: data.contactEmail.trim(),
+        contactPhone: data.contactPhone.trim(),
         currency: data.currency || "ZAR",
         creditLimit: data.creditLimit || "10000.00",
         agingBasis: data.agingBasis || "due_date",
@@ -1005,6 +1005,8 @@ export async function updateDebtorPolicy(
       body: {
         reason: updates.reason,
         expectedPolicyVersion: updates.expectedPolicyVersion,
+        termsType: updates.termsType,
+        termsDays: updates.termsDays,
         creditLimit: updates.creditLimit,
         status: updates.status,
       },
@@ -1123,7 +1125,7 @@ export async function recordPaymentAndAllocate(
     // If explicit mode and invoices specified, send explicit allocations
     if (params.mode === "explicit" && params.explicitAllocations?.length && paymentDocId) {
       for (const alloc of params.explicitAllocations) {
-        const allocIdemKey = `idem-alloc-${Date.now()}-${alloc.invoiceId}`;
+        const allocIdemKey = `${paymentIdemKey}-alloc-${alloc.invoiceId}`;
         await apiRequest("/v1/allocations", {
           method: "POST",
           idempotencyKey: allocIdemKey,
@@ -1140,9 +1142,12 @@ export async function recordPaymentAndAllocate(
       }
     }
 
+    const allocatedUnits = params.mode === "explicit"
+      ? (params.explicitAllocations ?? []).reduce((sum, item) => sum + parseMoney(item.amount), 0n)
+      : (payResult.allocations ?? []).reduce((sum: bigint, item: { amount: string }) => sum + parseMoney(item.amount), 0n);
     return {
-      allocatedTotal: payResult.allocatedAmount || "0.00",
-      unallocatedRemainder: payResult.unappliedRemainder || "0.00",
+      allocatedTotal: to2Decimals(allocatedUnits),
+      unallocatedRemainder: to2Decimals(parseMoney(params.receiptAmount) - allocatedUnits),
       newAllocationsCount: payResult.allocations?.length || (params.explicitAllocations?.length ?? 1),
       ledgerVersion: payResult.ledgerVersion || 1,
       storageMode: "durable_api",
@@ -1292,7 +1297,7 @@ export async function reverseAllocation(
     return {
       success: true,
       reversedAllocationId: params.allocationId,
-      restoredAmount: revResult.reversedAllocation?.amount || "0.00",
+      restoredAmount: revResult.restoredAmount || "0.00",
       ledgerVersion: revResult.ledgerVersion || 1,
       storageMode: "durable_api",
     };
@@ -1338,14 +1343,23 @@ export async function reverseAllocation(
   };
 }
 
-export async function getOnboardingState(): Promise<OnboardingState> {
+export async function getOnboardingState(request?: Request): Promise<OnboardingState> {
+  if (!isDemoMode()) {
+    const saved = await apiRequest<Partial<OnboardingState>>("/v1/onboarding", { request });
+    return { ...onboardingState, isCompleted: false, step: 1, ...saved };
+  }
   return { ...onboardingState };
 }
 
-export async function updateOnboardingState(updates: Partial<OnboardingState>): Promise<OnboardingState> {
+export async function updateOnboardingState(updates: Partial<OnboardingState>, request?: Request): Promise<OnboardingState> {
+  const definedUpdates = Object.fromEntries(Object.entries(updates).filter(([, value]) => value !== undefined));
+  if (!isDemoMode()) {
+    const saved = await apiRequest<Partial<OnboardingState>>("/v1/onboarding", { method: "PATCH", body: definedUpdates, request });
+    return { ...onboardingState, isCompleted: false, step: 1, ...saved };
+  }
   onboardingState = {
     ...onboardingState,
-    ...updates,
+    ...definedUpdates,
     requiresGenesisServer: false, // Invariant: pure Shopify native
   };
   return { ...onboardingState };
@@ -1368,6 +1382,20 @@ export interface StatementRecord {
   pdfSha256: string;
   downloadUrl: string;
   createdAt: string;
+}
+
+export interface StatementRunRecord {
+  statementRunId: string;
+  statementId: string;
+  debtorAccountId: string;
+  periodFrom: string;
+  periodTo: string;
+  generation: number;
+  status: string;
+  statementsCount: number;
+  totalDebits: string;
+  totalCredits: string;
+  netClosingBalance: string;
 }
 
 export interface StatementDeliveryRecord {
@@ -1409,6 +1437,23 @@ export async function getStatement(statementId: string, request?: Request): Prom
     downloadUrl: `/v1/statements/download?key=statements/demo/ACC-001.pdf&sig=demo`,
     createdAt: new Date().toISOString(),
   };
+}
+
+export async function buildStatementRun(
+  params: { debtorAccountId: string; periodFrom: string; periodTo: string },
+  idempotencyKey: string,
+  request?: Request,
+): Promise<StatementRunRecord> {
+  if (isDemoMode()) {
+    throw new Error("Statement runs require the durable Trade API; preview mode cannot build persisted statements.");
+  }
+
+  return await apiRequest<StatementRunRecord>("/v1/statements/run", {
+    method: "POST",
+    idempotencyKey,
+    request,
+    body: params,
+  });
 }
 
 export async function deliverStatement(

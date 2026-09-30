@@ -3,19 +3,137 @@ import type { DbClient } from "../../../../packages/database/tenant-context.ts";
 import { withTenantContext } from "../../../../packages/database/tenant-context.ts";
 import { getStatementStorage, LocalStorageProvider } from "../../../../packages/domain/src/storage.ts";
 import { requireAuth, requirePermission, type AuthResolverOptions } from "../auth/context.ts";
+import { computeRequestHash, type IdempotencyStore } from "../idempotency.ts";
+import { executeStatementRun } from "../../../worker/src/statements.ts";
 
 export interface StatementsRouteOptions extends AuthResolverOptions {
   db: DbClient;
+  idempotencyStore: IdempotencyStore;
 }
 
 export const statementsRoutes: FastifyPluginAsync<StatementsRouteOptions> = async (fastify, opts) => {
-  const { db } = opts;
+  const { db, idempotencyStore } = opts;
 
   if (!db) {
     throw new Error("Database client is required for statement routes");
   }
 
   const authHook = requireAuth(opts);
+
+  fastify.post(
+    "/v1/statements/run",
+    { preHandler: [authHook, requirePermission("run_statements")] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const idempotencyKey = request.headers["idempotency-key"];
+      if (typeof idempotencyKey !== "string" || !idempotencyKey.trim()) {
+        return reply.code(400).send({
+          error: "bad_request",
+          code: "missing_idempotency_key",
+          message: "Idempotency-Key header is required to build a statement run",
+        });
+      }
+
+      const body = (request.body || {}) as {
+        debtorAccountId?: string;
+        periodFrom?: string;
+        periodTo?: string;
+      };
+      if (
+        !body.debtorAccountId ||
+        !isCalendarDate(body.periodFrom) ||
+        !isCalendarDate(body.periodTo) ||
+        body.periodFrom > body.periodTo
+      ) {
+        return reply.code(400).send({
+          error: "bad_request",
+          code: "invalid_statement_period",
+          message: "debtorAccountId and an ordered YYYY-MM-DD statement period are required",
+        });
+      }
+
+      const tenantId = request.authContext!.tenantId;
+      const requestHash = computeRequestHash(body);
+      const claim = await idempotencyStore.claim(tenantId, idempotencyKey.trim(), requestHash);
+      if (claim.state === "conflict") {
+        return reply.code(409).send({
+          error: "conflict",
+          code: "idempotency_conflict",
+          message: claim.message,
+        });
+      }
+      if (claim.state === "in_flight") {
+        return reply.code(409).send({
+          error: "conflict",
+          code: "statement_run_in_progress",
+          message: "A statement run using this Idempotency-Key is in progress",
+        });
+      }
+      if (claim.state === "cached") {
+        return reply
+          .code(claim.record.statusCode)
+          .header("idempotent-replayed", "true")
+          .send(claim.record.responseBody);
+      }
+
+      try {
+        const result = await withTenantContext(db, tenantId, async (tx) => {
+          await idempotencyStore.verifyAndLockLease(tenantId, idempotencyKey.trim(), tx);
+          const account = await tx.query<{ id: string }>(
+            "SELECT id FROM debtor_account WHERE tenant_id = $1 AND id = $2 AND status != 'closed'",
+            [tenantId, body.debtorAccountId],
+          );
+          if (account.rows.length === 0) {
+            throw new Error("statement_account_not_found");
+          }
+
+          const generationResult = await tx.query<{ generation: number }>(
+            `SELECT COALESCE(MAX(generation), 0) + 1 AS generation
+             FROM statement_run
+             WHERE tenant_id = $1 AND period_from = $2 AND period_to = $3`,
+            [tenantId, body.periodFrom, body.periodTo],
+          );
+          const run = await executeStatementRun(tx, tenantId, {
+            periodFrom: body.periodFrom!,
+            periodTo: body.periodTo!,
+            generation: generationResult.rows[0]!.generation,
+            actorId: request.authContext!.actorId,
+          });
+          const statementResult = await tx.query<{ id: string }>(
+            `SELECT id FROM statement
+             WHERE tenant_id = $1 AND statement_run_id = $2 AND debtor_account_id = $3`,
+            [tenantId, run.statementRunId, body.debtorAccountId],
+          );
+          if (statementResult.rows.length === 0) {
+            throw new Error("statement_build_failed");
+          }
+
+          const response = {
+            ...run,
+            statementId: statementResult.rows[0]!.id,
+            debtorAccountId: body.debtorAccountId,
+          };
+          await idempotencyStore.complete(tenantId, idempotencyKey.trim(), 201, response, tx);
+          return response;
+        });
+        return reply.code(201).send(result);
+      } catch (error) {
+        await idempotencyStore.release(tenantId, idempotencyKey.trim());
+        const message = (error as Error).message;
+        if (message === "statement_account_not_found") {
+          return reply.code(404).send({
+            error: "not_found",
+            code: "statement_account_not_found",
+            message: "An active or held account with that ID was not found",
+          });
+        }
+        return reply.code(500).send({
+          error: "internal_error",
+          code: "statement_build_failed",
+          message: "Statement run could not be completed",
+        });
+      }
+    },
+  );
 
   // ==========================================
   // GET /v1/statements/:id
@@ -228,3 +346,9 @@ export const statementsRoutes: FastifyPluginAsync<StatementsRouteOptions> = asyn
     return reply.redirect(signedUrl);
   });
 };
+
+function isCalendarDate(value: string | undefined): value is string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value;
+}

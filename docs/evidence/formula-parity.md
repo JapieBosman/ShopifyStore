@@ -27,3 +27,13 @@ A Genesis finance/domain reviewer must verify the source interpretation, expecte
 
 The old OnlineVersion test expected a positive current amount after excess payment. That conflicts with the observed Delphi cascade at line 399 and with the new product signed balance convention. This proof intentionally expects -30.
 
+# Technical source review — 2026-09-30
+
+All seven recorded Genesis source SHA256 values were recomputed and still match. The 44 fixtures comprise 27 source-derived cases (17 AGE and 10 PER) and 17 proposed product-policy cases (10 DUE, 4 CASH, 3 REV). Independent financial approval remains pending.
+
+`spikes/rule-proof/tests/source-cascade.test.ts` implements a separate signed-credit cascade from `SysDEBBalance_ReCalc.pas` lines 320–399. It checks all AGE fixtures plus 512 generated comparisons and net conservation. Excess credit remains negative in the current bucket/net balance. Validation: `npm test --prefix spikes/rule-proof` passed 49 tests; `node --test tests/unit/money-terms.test.ts` passed 9 tests.
+
+`SysDEBCalcAgeing.pas` lines 98–222 reconstructs balances newest first and updates legacy transaction Balance/PaidAmount fields. That is evidence of legacy reconstruction, not permission to mutate the new immutable ledger during statement generation.
+
+`COF010.pas` lines 233–264 calculates all-tender availability separately from cash remaining. CASH fixtures define a cash-only product policy and cannot be presented as exact parity with that all-tender calculation. Due-date ageing also remains distinct from Genesis accounting-period ageing. Unresolved legacy reversals and automatic interest remain excluded.
+
